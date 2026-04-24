@@ -7,7 +7,12 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Index from "./pages/Index.tsx";
 import Auth from "./pages/Auth.tsx";
-import Admin from "./pages/Admin.tsx";
+import AdminLayout from "./pages/admin/AdminLayout.tsx";
+import AdminDashboard from "./pages/admin/AdminDashboard.tsx";
+import ServicesAdmin from "./pages/admin/ServicesAdmin.tsx";
+import StaffAdmin from "./pages/admin/StaffAdmin.tsx";
+import UsersAdmin from "./pages/admin/UsersAdmin.tsx";
+import VideosAdmin from "./pages/admin/VideosAdmin.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -25,11 +30,24 @@ const App = () => (
             <Route
               path="/admin"
               element={
-                <ProtectedRoute>
-                  <Admin />
+                <ProtectedRoute requireRoles={["admin", "secretary"]}>
+                  <AdminLayout />
                 </ProtectedRoute>
               }
-            />
+            >
+              <Route index element={<AdminDashboard />} />
+              <Route path="servicios" element={<ServicesAdmin />} />
+              <Route path="personal" element={<StaffAdmin />} />
+              <Route
+                path="usuarios"
+                element={
+                  <ProtectedRoute requireRoles={["admin"]}>
+                    <UsersAdmin />
+                  </ProtectedRoute>
+                }
+              />
+              <Route path="videos" element={<VideosAdmin />} />
+            </Route>
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

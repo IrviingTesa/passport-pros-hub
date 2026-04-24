@@ -41,6 +41,81 @@ export type Database = {
         }
         Relationships: []
       }
+      services: {
+        Row: {
+          category: string
+          created_at: string
+          display_order: number
+          id: string
+          is_active: boolean
+          name: string
+          short_description: string | null
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          name: string
+          short_description?: string | null
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          name?: string
+          short_description?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      staff: {
+        Row: {
+          bio: string | null
+          created_at: string
+          display_order: number
+          email: string | null
+          full_name: string
+          id: string
+          is_active: boolean
+          photo_url: string | null
+          position: string
+          updated_at: string
+          whatsapp_number: string | null
+        }
+        Insert: {
+          bio?: string | null
+          created_at?: string
+          display_order?: number
+          email?: string | null
+          full_name: string
+          id?: string
+          is_active?: boolean
+          photo_url?: string | null
+          position: string
+          updated_at?: string
+          whatsapp_number?: string | null
+        }
+        Update: {
+          bio?: string | null
+          created_at?: string
+          display_order?: number
+          email?: string | null
+          full_name?: string
+          id?: string
+          is_active?: boolean
+          photo_url?: string | null
+          position?: string
+          updated_at?: string
+          whatsapp_number?: string | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
