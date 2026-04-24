@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Youtube, Music2, ExternalLink, Play } from "lucide-react";
+import { Youtube, ExternalLink, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -17,11 +17,6 @@ interface YouTubePayload {
   videos: YouTubeVideo[];
   channelUrl: string | null;
   error?: string;
-}
-
-interface VideoChannelsRow {
-  tiktok_profile_url: string | null;
-  tiktok_video_urls: string[] | null;
 }
 
 const YouTubeCard = ({ video }: { video: YouTubeVideo }) => (
@@ -54,88 +49,44 @@ const YouTubeCard = ({ video }: { video: YouTubeVideo }) => (
   </a>
 );
 
-const TikTokCard = ({ url }: { url: string }) => {
-  // Extraer ID si es posible para mostrar miniatura/embed simple
-  return (
-    <a href={url} target="_blank" rel="noopener noreferrer" className="group block">
-      <Card className="aspect-[9/16] overflow-hidden border-border/60 hover:border-accent/40 hover:shadow-elegant transition-all duration-300 bg-gradient-navy flex flex-col items-center justify-center text-primary-foreground p-4 relative">
-        <Music2 className="w-10 h-10 text-accent mb-3" />
-        <p className="text-xs text-center text-primary-foreground/80 font-medium">
-          Ver en TikTok
-        </p>
-        <div className="absolute inset-0 bg-accent/0 group-hover:bg-accent/10 transition-colors" />
-      </Card>
-    </a>
-  );
-};
-
-const PlaceholderCard = ({ aspect }: { aspect: "video" | "tiktok" }) => (
-  <Card
-    className={`${
-      aspect === "video" ? "aspect-video" : "aspect-[9/16]"
-    } bg-secondary border-dashed border-2 flex items-center justify-center text-muted-foreground text-xs p-4 text-center`}
-  >
+const PlaceholderCard = () => (
+  <Card className="aspect-video bg-secondary border-dashed border-2 flex items-center justify-center text-muted-foreground text-xs p-4 text-center">
     Próximamente
   </Card>
 );
 
 export const VideosSection = () => {
-  const [youtubeData, setYoutubeData] = useState<YouTubePayload | null>(null);
-  const [youtubeLoading, setYoutubeLoading] = useState(true);
-  const [tiktok, setTiktok] = useState<VideoChannelsRow | null>(null);
-  const [tiktokLoading, setTiktokLoading] = useState(true);
+  const [data, setData] = useState<YouTubePayload | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
-
-    // YouTube via edge function
     (async () => {
       try {
-        const { data, error } = await supabase.functions.invoke<YouTubePayload>(
-          "youtube-videos",
-          { body: {} },
-        );
+        const { data: payload, error } =
+          await supabase.functions.invoke<YouTubePayload>("youtube-videos", {
+            body: {},
+          });
         if (cancelled) return;
         if (error) {
           console.error("youtube-videos invoke error:", error);
-          setYoutubeData({ videos: [], channelUrl: null });
+          setData({ videos: [], channelUrl: null });
         } else {
-          setYoutubeData(data ?? { videos: [], channelUrl: null });
+          setData(payload ?? { videos: [], channelUrl: null });
         }
       } catch (e) {
-        if (!cancelled) setYoutubeData({ videos: [], channelUrl: null });
+        if (!cancelled) setData({ videos: [], channelUrl: null });
       } finally {
-        if (!cancelled) setYoutubeLoading(false);
+        if (!cancelled) setLoading(false);
       }
     })();
-
-    // TikTok directo desde la BD
-    (async () => {
-      const { data } = await supabase
-        .from("video_channels")
-        .select("tiktok_profile_url, tiktok_video_urls")
-        .limit(1)
-        .maybeSingle();
-      if (cancelled) return;
-      const urls = Array.isArray(data?.tiktok_video_urls)
-        ? (data!.tiktok_video_urls as unknown as string[])
-        : [];
-      setTiktok({
-        tiktok_profile_url: data?.tiktok_profile_url ?? null,
-        tiktok_video_urls: urls,
-      });
-      setTiktokLoading(false);
-    })();
-
     return () => {
       cancelled = true;
     };
   }, []);
 
-  const ytVideos = youtubeData?.videos ?? [];
-  const ytChannelUrl = youtubeData?.channelUrl ?? null;
-  const ttVideos = tiktok?.tiktok_video_urls ?? [];
-  const ttProfileUrl = tiktok?.tiktok_profile_url ?? null;
+  const videos = data?.videos ?? [];
+  const channelUrl = data?.channelUrl ?? null;
 
   return (
     <section id="videos" className="section-padding bg-background">
@@ -153,85 +104,39 @@ export const VideosSection = () => {
           </p>
         </div>
 
-        {/* YouTube */}
-        <div className="mb-16">
-          <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-destructive/10 flex items-center justify-center">
-                <Youtube className="w-6 h-6 text-destructive" />
-              </div>
-              <h3 className="font-serif text-2xl font-bold text-primary">
-                Últimos en YouTube
-              </h3>
+        <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg bg-destructive/10 flex items-center justify-center">
+              <Youtube className="w-6 h-6 text-destructive" />
             </div>
-            {ytChannelUrl && (
-              <Button asChild variant="outline" size="sm">
-                <a href={ytChannelUrl} target="_blank" rel="noopener noreferrer">
-                  Ver canal completo <ExternalLink className="w-4 h-4" />
-                </a>
-              </Button>
-            )}
+            <h3 className="font-serif text-2xl font-bold text-primary">
+              Últimos videos en YouTube
+            </h3>
           </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-            {youtubeLoading
-              ? Array.from({ length: 10 }).map((_, i) => (
-                  <Skeleton key={i} className="aspect-video rounded-lg" />
-                ))
-              : ytVideos.length > 0
-              ? ytVideos.map((v) => <YouTubeCard key={v.videoId} video={v} />)
-              : Array.from({ length: 5 }).map((_, i) => (
-                  <PlaceholderCard key={i} aspect="video" />
-                ))}
-          </div>
-          {!youtubeLoading && ytVideos.length === 0 && (
-            <p className="text-center text-sm text-muted-foreground mt-6 italic">
-              Configura el canal de YouTube desde el panel admin para mostrar
-              videos automáticamente.
-            </p>
+          {channelUrl && (
+            <Button asChild variant="outline" size="sm">
+              <a href={channelUrl} target="_blank" rel="noopener noreferrer">
+                Ver canal completo <ExternalLink className="w-4 h-4" />
+              </a>
+            </Button>
           )}
         </div>
 
-        {/* TikTok */}
-        <div>
-          <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                <Music2 className="w-6 h-6 text-primary" />
-              </div>
-              <h3 className="font-serif text-2xl font-bold text-primary">
-                Últimos en TikTok
-              </h3>
-            </div>
-            {ttProfileUrl && (
-              <Button asChild variant="outline" size="sm">
-                <a href={ttProfileUrl} target="_blank" rel="noopener noreferrer">
-                  Ver perfil completo <ExternalLink className="w-4 h-4" />
-                </a>
-              </Button>
-            )}
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-            {tiktokLoading
-              ? Array.from({ length: 10 }).map((_, i) => (
-                  <Skeleton key={i} className="aspect-[9/16] rounded-lg" />
-                ))
-              : ttVideos.length > 0
-              ? ttVideos.slice(0, 10).map((url, i) => (
-                  <TikTokCard key={`${url}-${i}`} url={url} />
-                ))
-              : Array.from({ length: 5 }).map((_, i) => (
-                  <PlaceholderCard key={i} aspect="tiktok" />
-                ))}
-          </div>
-          {!tiktokLoading && ttVideos.length === 0 && (
-            <p className="text-center text-sm text-muted-foreground mt-6 italic">
-              Agrega los enlaces de TikTok desde el panel admin para mostrarlos
-              aquí.
-            </p>
-          )}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+          {loading
+            ? Array.from({ length: 10 }).map((_, i) => (
+                <Skeleton key={i} className="aspect-video rounded-lg" />
+              ))
+            : videos.length > 0
+            ? videos.map((v) => <YouTubeCard key={v.videoId} video={v} />)
+            : Array.from({ length: 5 }).map((_, i) => <PlaceholderCard key={i} />)}
         </div>
+
+        {!loading && videos.length === 0 && (
+          <p className="text-center text-sm text-muted-foreground mt-6 italic">
+            Aún no hay videos disponibles.
+          </p>
+        )}
       </div>
     </section>
   );
