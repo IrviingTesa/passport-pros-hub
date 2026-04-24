@@ -14,7 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      video_channels: {
+        Row: {
+          created_at: string
+          id: string
+          tiktok_profile_url: string | null
+          tiktok_video_urls: Json
+          updated_at: string
+          youtube_channel_id: string | null
+          youtube_channel_url: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          tiktok_profile_url?: string | null
+          tiktok_video_urls?: Json
+          updated_at?: string
+          youtube_channel_id?: string | null
+          youtube_channel_url?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          tiktok_profile_url?: string | null
+          tiktok_video_urls?: Json
+          updated_at?: string
+          youtube_channel_id?: string | null
+          youtube_channel_url?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
