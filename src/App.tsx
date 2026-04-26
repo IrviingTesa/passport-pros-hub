@@ -7,6 +7,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Index from "./pages/Index.tsx";
 import Auth from "./pages/Auth.tsx";
+import DS160Form from "./pages/DS160Form.tsx";
 import AdminLayout from "./pages/admin/AdminLayout.tsx";
 import AdminDashboard from "./pages/admin/AdminDashboard.tsx";
 import ServicesAdmin from "./pages/admin/ServicesAdmin.tsx";
@@ -14,6 +15,7 @@ import StaffAdmin from "./pages/admin/StaffAdmin.tsx";
 import UsersAdmin from "./pages/admin/UsersAdmin.tsx";
 import VideosAdmin from "./pages/admin/VideosAdmin.tsx";
 import ReviewsAdmin from "./pages/admin/ReviewsAdmin.tsx";
+import DS160Admin from "./pages/admin/DS160Admin.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
