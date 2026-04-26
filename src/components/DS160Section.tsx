@@ -1,12 +1,9 @@
+import { Link } from "react-router-dom";
 import { ClipboardList, ShieldCheck, Clock, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { whatsappLink } from "@/config/site";
 
-/**
- * Sección DS-160 — placeholder de Fase 1.
- * En Fase 4 implementaremos el formulario multi-paso completo con subida de archivos
- * (foto + pasaporte) y guardado en base de datos.
- */
+/** Sección DS-160 — CTA al wizard del pre-registro. */
 export const DS160Section = () => {
   return (
     <section id="ds160" className="section-padding bg-gradient-navy text-primary-foreground relative overflow-hidden">
@@ -53,8 +50,8 @@ export const DS160Section = () => {
           </div>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button variant="gold" size="lg" disabled>
-              Iniciar pre-registro (próximamente)
+            <Button asChild variant="gold" size="lg">
+              <Link to="/ds160">Iniciar pre-registro</Link>
             </Button>
             <Button asChild variant="outlineLight" size="lg">
               <a href={whatsappLink("Pre-registro DS-160 - Visa Americana")} target="_blank" rel="noopener noreferrer">
@@ -64,7 +61,7 @@ export const DS160Section = () => {
           </div>
 
           <p className="text-xs text-primary-foreground/60 mt-6 italic">
-            ✨ El formulario multi-paso estará disponible muy pronto.
+            ✨ Sin necesidad de crear cuenta. Tu progreso se guarda automáticamente.
           </p>
         </div>
       </div>

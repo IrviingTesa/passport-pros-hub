@@ -14,6 +14,54 @@ export type Database = {
   }
   public: {
     Tables: {
+      ds160_applications: {
+        Row: {
+          created_at: string
+          current_step: number
+          edit_token: string
+          email: string
+          embassy: string | null
+          form_data: Json
+          full_name: string
+          id: string
+          purpose_of_trip: string | null
+          status: string
+          submitted_at: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          current_step?: number
+          edit_token?: string
+          email: string
+          embassy?: string | null
+          form_data?: Json
+          full_name?: string
+          id?: string
+          purpose_of_trip?: string | null
+          status?: string
+          submitted_at?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          current_step?: number
+          edit_token?: string
+          email?: string
+          embassy?: string | null
+          form_data?: Json
+          full_name?: string
+          id?: string
+          purpose_of_trip?: string | null
+          status?: string
+          submitted_at?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -214,12 +262,70 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_ds160_with_token: {
+        Args: { _edit_token: string; _id: string }
+        Returns: {
+          created_at: string
+          current_step: number
+          edit_token: string
+          email: string
+          embassy: string | null
+          form_data: Json
+          full_name: string
+          id: string
+          purpose_of_trip: string | null
+          status: string
+          submitted_at: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "ds160_applications"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
         Returns: boolean
+      }
+      update_ds160_with_token: {
+        Args: {
+          _current_step: number
+          _edit_token: string
+          _email: string
+          _embassy: string
+          _form_data: Json
+          _full_name: string
+          _id: string
+          _purpose_of_trip: string
+          _status: string
+        }
+        Returns: {
+          created_at: string
+          current_step: number
+          edit_token: string
+          email: string
+          embassy: string | null
+          form_data: Json
+          full_name: string
+          id: string
+          purpose_of_trip: string | null
+          status: string
+          submitted_at: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "ds160_applications"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
     }
     Enums: {

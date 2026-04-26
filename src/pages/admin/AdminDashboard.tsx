@@ -3,13 +3,14 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Briefcase, Users, Video, Star } from "lucide-react";
+import { Briefcase, Users, Video, Star, ClipboardList } from "lucide-react";
 
 interface Counts {
   services: number;
   staff: number;
   ytConfigured: boolean;
   pendingReviews: number;
+  pendingDS160: number;
 }
 
 export default function AdminDashboard() {
@@ -29,17 +30,28 @@ export default function AdminDashboard() {
         .from("reviews")
         .select("*", { count: "exact", head: true })
         .eq("status", "pending"),
-    ]).then(([s, st, yt, rev]) => {
+      supabase
+        .from("ds160_applications")
+        .select("*", { count: "exact", head: true })
+        .eq("status", "submitted"),
+    ]).then(([s, st, yt, rev, ds]) => {
       setCounts({
         services: s.count ?? 0,
         staff: st.count ?? 0,
         ytConfigured: !!yt.data?.youtube_channel_id,
         pendingReviews: rev.count ?? 0,
+        pendingDS160: ds.count ?? 0,
       });
     });
   }, []);
 
   const cards = [
+    {
+      icon: ClipboardList,
+      label: "DS-160 por revisar",
+      value: counts?.pendingDS160 ?? "—",
+      color: "text-primary",
+    },
     {
       icon: Briefcase,
       label: "Servicios registrados",
@@ -85,7 +97,7 @@ export default function AdminDashboard() {
         </p>
       </div>
 
-      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
         {cards.map(({ icon: Icon, label, value, color }) => (
           <Card key={label}>
             <CardContent className="pt-6">
