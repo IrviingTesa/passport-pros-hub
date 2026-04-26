@@ -13,6 +13,7 @@ import ServicesAdmin from "./pages/admin/ServicesAdmin.tsx";
 import StaffAdmin from "./pages/admin/StaffAdmin.tsx";
 import UsersAdmin from "./pages/admin/UsersAdmin.tsx";
 import VideosAdmin from "./pages/admin/VideosAdmin.tsx";
+import ReviewsAdmin from "./pages/admin/ReviewsAdmin.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -47,6 +48,7 @@ const App = () => (
                 }
               />
               <Route path="videos" element={<VideosAdmin />} />
+              <Route path="resenas" element={<ReviewsAdmin />} />
             </Route>
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />

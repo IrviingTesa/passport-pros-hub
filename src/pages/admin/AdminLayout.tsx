@@ -5,6 +5,7 @@ import {
   Users,
   ShieldCheck,
   Video,
+  Star,
   LogOut,
   Home,
   Menu,
@@ -30,6 +31,7 @@ const navItems = [
     adminOnly: true,
   },
   { to: "/admin/videos", icon: Video, label: "Videos" },
+  { to: "/admin/resenas", icon: Star, label: "Reseñas" },
 ];
 
 const SidebarContent = ({ onNavigate }: { onNavigate?: () => void }) => {

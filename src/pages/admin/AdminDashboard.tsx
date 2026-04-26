@@ -3,12 +3,13 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Briefcase, Users, Video, FileText } from "lucide-react";
+import { Briefcase, Users, Video, Star } from "lucide-react";
 
 interface Counts {
   services: number;
   staff: number;
   ytConfigured: boolean;
+  pendingReviews: number;
 }
 
 export default function AdminDashboard() {
@@ -24,11 +25,16 @@ export default function AdminDashboard() {
         .select("youtube_channel_id")
         .limit(1)
         .maybeSingle(),
-    ]).then(([s, st, yt]) => {
+      supabase
+        .from("reviews")
+        .select("*", { count: "exact", head: true })
+        .eq("status", "pending"),
+    ]).then(([s, st, yt, rev]) => {
       setCounts({
         services: s.count ?? 0,
         staff: st.count ?? 0,
         ytConfigured: !!yt.data?.youtube_channel_id,
+        pendingReviews: rev.count ?? 0,
       });
     });
   }, []);
@@ -53,10 +59,10 @@ export default function AdminDashboard() {
       color: "text-destructive",
     },
     {
-      icon: FileText,
-      label: "Trámites DS-160",
-      value: "Próximamente",
-      color: "text-muted-foreground",
+      icon: Star,
+      label: "Reseñas pendientes",
+      value: counts?.pendingReviews ?? "—",
+      color: "text-accent",
     },
   ];
 
