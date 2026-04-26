@@ -30,6 +30,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/ds160" element={<DS160Form />} />
             <Route
               path="/admin"
               element={
@@ -51,6 +52,7 @@ const App = () => (
               />
               <Route path="videos" element={<VideosAdmin />} />
               <Route path="resenas" element={<ReviewsAdmin />} />
+              <Route path="ds160" element={<DS160Admin />} />
             </Route>
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />

@@ -9,6 +9,7 @@ import {
   LogOut,
   Home,
   Menu,
+  ClipboardList,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -22,6 +23,7 @@ import { useState } from "react";
 
 const navItems = [
   { to: "/admin", icon: LayoutDashboard, label: "Inicio", end: true },
+  { to: "/admin/ds160", icon: ClipboardList, label: "Solicitudes DS-160" },
   { to: "/admin/servicios", icon: Briefcase, label: "Servicios" },
   { to: "/admin/personal", icon: Users, label: "Personal del despacho" },
   {
