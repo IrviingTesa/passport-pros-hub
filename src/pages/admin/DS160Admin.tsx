@@ -1,0 +1,317 @@
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { toast } from "sonner";
+import { Loader2, Eye, Mail, Phone, MapPin, User, Calendar } from "lucide-react";
+import { STATUS_LABELS } from "@/lib/ds160-options";
+import { cn } from "@/lib/utils";
+
+interface Application {
+  id: string;
+  email: string;
+  full_name: string;
+  purpose_of_trip: string | null;
+  embassy: string | null;
+  status: string;
+  current_step: number;
+  submitted_at: string | null;
+  created_at: string;
+  updated_at: string;
+  form_data: Record<string, unknown>;
+  user_id: string | null;
+}
+
+const STATUS_TABS = [
+  { value: "submitted", label: "Enviadas" },
+  { value: "in_review", label: "En revisión" },
+  { value: "completed", label: "Completadas" },
+  { value: "rejected", label: "Rechazadas" },
+  { value: "draft", label: "Borradores" },
+];
+
+export default function DS160Admin() {
+  const [items, setItems] = useState<Application[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [tab, setTab] = useState("submitted");
+  const [selected, setSelected] = useState<Application | null>(null);
+  const [updating, setUpdating] = useState(false);
+
+  const load = async () => {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from("ds160_applications")
+      .select("*")
+      .order("created_at", { ascending: false });
+    if (error) {
+      toast.error("Error al cargar solicitudes");
+      setItems([]);
+    } else {
+      setItems((data ?? []) as Application[]);
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    load();
+  }, []);
+
+  const filtered = items.filter((i) => i.status === tab);
+
+  const updateStatus = async (id: string, newStatus: string) => {
+    setUpdating(true);
+    const { error } = await supabase
+      .from("ds160_applications")
+      .update({ status: newStatus })
+      .eq("id", id);
+    setUpdating(false);
+    if (error) {
+      toast.error("No se pudo actualizar el estado");
+      return;
+    }
+    toast.success("Estado actualizado");
+    setSelected((s) => (s ? { ...s, status: newStatus } : s));
+    load();
+  };
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h1 className="font-serif text-3xl font-bold text-primary">Solicitudes DS-160</h1>
+        <p className="text-muted-foreground mt-1">
+          Pre-registros de visa americana enviados por los clientes.
+        </p>
+      </div>
+
+      <Tabs value={tab} onValueChange={setTab}>
+        <TabsList className="flex-wrap h-auto">
+          {STATUS_TABS.map((t) => {
+            const count = items.filter((i) => i.status === t.value).length;
+            return (
+              <TabsTrigger key={t.value} value={t.value} className="gap-2">
+                {t.label}
+                {count > 0 && (
+                  <Badge variant="secondary" className="h-5 px-1.5 text-xs">
+                    {count}
+                  </Badge>
+                )}
+              </TabsTrigger>
+            );
+          })}
+        </TabsList>
+
+        {STATUS_TABS.map((t) => (
+          <TabsContent key={t.value} value={t.value} className="mt-4">
+            {loading ? (
+              <div className="flex justify-center py-12">
+                <Loader2 className="w-8 h-8 animate-spin text-primary" />
+              </div>
+            ) : filtered.length === 0 ? (
+              <Card>
+                <CardContent className="py-12 text-center text-muted-foreground">
+                  No hay solicitudes en esta categoría.
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="space-y-3">
+                {filtered.map((app) => (
+                  <Card key={app.id} className="hover:shadow-md transition-shadow">
+                    <CardContent className="pt-5">
+                      <div className="flex flex-wrap items-start justify-between gap-3">
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <h3 className="font-semibold text-foreground">
+                              {app.full_name || "(Sin nombre)"}
+                            </h3>
+                            <Badge
+                              className={cn(
+                                "text-xs",
+                                STATUS_LABELS[app.status]?.color,
+                              )}
+                              variant="outline"
+                            >
+                              {STATUS_LABELS[app.status]?.label ?? app.status}
+                            </Badge>
+                          </div>
+                          <div className="text-sm text-muted-foreground mt-1 space-y-0.5">
+                            <div className="flex items-center gap-1.5">
+                              <Mail className="w-3 h-3" /> {app.email}
+                            </div>
+                            <div>
+                              {app.purpose_of_trip && (
+                                <span className="mr-3">📍 {app.purpose_of_trip}</span>
+                              )}
+                              {app.embassy && <span>🏛️ {app.embassy}</span>}
+                            </div>
+                            <div className="text-xs">
+                              Folio: <strong>{app.id.slice(0, 8).toUpperCase()}</strong> ·{" "}
+                              {new Date(app.created_at).toLocaleString("es-MX")}
+                            </div>
+                          </div>
+                        </div>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setSelected(app)}
+                        >
+                          <Eye className="w-4 h-4" /> Ver detalle
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </TabsContent>
+        ))}
+      </Tabs>
+
+      <Dialog open={!!selected} onOpenChange={(o) => !o && setSelected(null)}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          {selected && (
+            <>
+              <DialogHeader>
+                <DialogTitle className="font-serif text-2xl">
+                  {selected.full_name || "Sin nombre"}
+                </DialogTitle>
+                <p className="text-xs text-muted-foreground">
+                  Folio: {selected.id.slice(0, 8).toUpperCase()}
+                </p>
+              </DialogHeader>
+
+              <div className="space-y-5">
+                <div className="flex items-center justify-between border rounded-md p-3 bg-muted/30">
+                  <span className="text-sm font-medium">Estado:</span>
+                  <Select
+                    value={selected.status}
+                    onValueChange={(v) => updateStatus(selected.id, v)}
+                    disabled={updating}
+                  >
+                    <SelectTrigger className="w-48">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Object.entries(STATUS_LABELS).map(([k, v]) => (
+                        <SelectItem key={k} value={k}>
+                          {v.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <DetailSection title="Información del trámite" icon={Calendar}>
+                  <DetailRow label="Propósito" value={selected.purpose_of_trip} />
+                  <DetailRow label="Embajada/Consulado" value={selected.embassy} />
+                  <DetailRow
+                    label="Enviada"
+                    value={
+                      selected.submitted_at
+                        ? new Date(selected.submitted_at).toLocaleString("es-MX")
+                        : "—"
+                    }
+                  />
+                </DetailSection>
+
+                <DetailSection title="Datos personales" icon={User}>
+                  <DetailRow label="Nombre(s)" value={fd(selected, "first_name")} />
+                  <DetailRow label="Apellido(s)" value={fd(selected, "last_name")} />
+                  <DetailRow label="Otros nombres" value={fd(selected, "other_names")} />
+                  <DetailRow
+                    label="Sexo"
+                    value={fd(selected, "sex") === "female" ? "Mujer" : fd(selected, "sex") === "male" ? "Hombre" : null}
+                  />
+                  <DetailRow label="Fecha de nacimiento" value={fd(selected, "birth_date")} />
+                  <DetailRow label="Ciudad de nacimiento" value={fd(selected, "birth_city")} />
+                  <DetailRow label="Estado de nacimiento" value={fd(selected, "birth_state")} />
+                  <DetailRow label="País de nacimiento" value={fd(selected, "birth_country")} />
+                  <DetailRow label="Nacionalidad" value={fd(selected, "nationality")} />
+                </DetailSection>
+
+                <DetailSection title="Contacto" icon={Mail}>
+                  <DetailRow label="Email principal" value={selected.email} />
+                  <DetailRow label="Otros emails" value={fd(selected, "other_emails")} />
+                  <DetailRow
+                    label="Teléfono"
+                    value={
+                      fd(selected, "phone_country_code") && fd(selected, "phone_number")
+                        ? `${fd(selected, "phone_country_code")} ${fd(selected, "phone_number")}`
+                        : null
+                    }
+                  />
+                  <DetailRow label="Otros teléfonos" value={fd(selected, "other_phones")} />
+                </DetailSection>
+
+                <DetailSection title="Domicilio" icon={MapPin}>
+                  <DetailRow label="Dirección" value={fd(selected, "address_line1")} />
+                  <DetailRow label="Línea 2" value={fd(selected, "address_line2")} />
+                  <DetailRow label="Ciudad" value={fd(selected, "city")} />
+                  <DetailRow label="Estado" value={fd(selected, "state")} />
+                  <DetailRow label="CP" value={fd(selected, "postal_code")} />
+                  <DetailRow label="País de residencia" value={fd(selected, "residence_country")} />
+                </DetailSection>
+
+                <DetailSection title="Viaje" icon={Phone}>
+                  <DetailRow
+                    label="¿Viaja con otros?"
+                    value={fd(selected, "traveling_with_others") === "yes" ? "Sí" : "No"}
+                  />
+                  <DetailRow label="Acompañantes" value={fd(selected, "travel_companions")} />
+                </DetailSection>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
+function fd(app: Application, key: string): string | null {
+  const v = app.form_data?.[key];
+  if (v == null || v === "") return null;
+  return String(v);
+}
+
+function DetailSection({
+  title,
+  icon: Icon,
+  children,
+}: {
+  title: string;
+  icon: React.ComponentType<{ className?: string }>;
+  children: React.ReactNode;
+}) {
+  return (
+    <div>
+      <h4 className="font-semibold text-primary flex items-center gap-2 mb-2">
+        <Icon className="w-4 h-4" /> {title}
+      </h4>
+      <div className="border rounded-md divide-y">{children}</div>
+    </div>
+  );
+}
+
+function DetailRow({ label, value }: { label: string; value: string | null }) {
+  return (
+    <div className="grid grid-cols-[140px_1fr] gap-2 px-3 py-2 text-sm">
+      <span className="text-muted-foreground">{label}</span>
+      <span className="font-medium break-words">{value || "—"}</span>
+    </div>
+  );
+}
