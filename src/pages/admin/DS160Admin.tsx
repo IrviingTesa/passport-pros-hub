@@ -104,6 +104,19 @@ export default function DS160Admin() {
         </p>
       </div>
 
+      {!canEdit && (
+        <Card className="border-accent/40 bg-accent/5">
+          <CardContent className="pt-4 pb-4 flex items-center gap-3 text-sm">
+            <Lock className="w-4 h-4 text-accent flex-shrink-0" />
+            <span>
+              Estás en modo <strong>solo lectura</strong>. Para editar el
+              estado de una solicitud, pide autorización al administrador
+              desde el panel de inicio.
+            </span>
+          </CardContent>
+        </Card>
+      )}
+
       <Tabs value={tab} onValueChange={setTab}>
         <TabsList className="flex-wrap h-auto">
           {STATUS_TABS.map((t) => {
@@ -218,7 +231,7 @@ export default function DS160Admin() {
                   <Select
                     value={selected.status}
                     onValueChange={(v) => updateStatus(selected.id, v)}
-                    disabled={updating}
+                    disabled={updating || !canEdit}
                   >
                     <SelectTrigger className="w-48">
                       <SelectValue />
