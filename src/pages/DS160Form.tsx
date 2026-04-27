@@ -12,6 +12,7 @@ import { Progress } from "@/components/ui/progress";
 import { Card, CardContent } from "@/components/ui/card";
 import { DS160Step1 } from "@/components/ds160/DS160Step1";
 import { DS160Step2 } from "@/components/ds160/DS160Step2";
+import { SEO } from "@/components/SEO";
 import {
   step1Schema,
   step2Schema,
