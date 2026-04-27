@@ -18,9 +18,11 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { Loader2, Eye, Mail, Phone, MapPin, User, Calendar } from "lucide-react";
+import { Loader2, Eye, Mail, Phone, MapPin, User, Calendar, Lock } from "lucide-react";
 import { STATUS_LABELS } from "@/lib/ds160-options";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/contexts/AuthContext";
+import { useSecretaryEditPermission } from "@/hooks/useSecretaryEditPermission";
 
 interface Application {
   id: string;
@@ -46,6 +48,10 @@ const STATUS_TABS = [
 ];
 
 export default function DS160Admin() {
+  const { user, isAdmin, isSecretary } = useAuth();
+  const { hasActive: secretaryCanEdit } = useSecretaryEditPermission();
+  const canEdit = isAdmin || (isSecretary && secretaryCanEdit);
+
   const [items, setItems] = useState<Application[]>([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState("submitted");
