@@ -173,7 +173,19 @@ export default function DS160Admin() {
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => setSelected(app)}
+                          onClick={() => {
+                            setSelected(app);
+                            if (user) {
+                              supabase
+                                .from("ds160_access_log")
+                                .insert({
+                                  user_id: user.id,
+                                  ds160_id: app.id,
+                                  ds160_full_name: app.full_name,
+                                })
+                                .then(() => {});
+                            }
+                          }}
                         >
                           <Eye className="w-4 h-4" /> Ver detalle
                         </Button>
