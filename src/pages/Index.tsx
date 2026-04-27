@@ -1,5 +1,7 @@
+import { useEffect } from "react";
 import { Navbar } from "@/components/Navbar";
 import { Hero } from "@/components/Hero";
+import { trackPageVisit } from "@/lib/track-visit";
 import { Services } from "@/components/Services";
 import { TeamSection } from "@/components/TeamSection";
 import { VideosSection } from "@/components/VideosSection";
@@ -12,6 +14,12 @@ import { SEO } from "@/components/SEO";
 import { SITE_CONFIG } from "@/config/site";
 
 const Index = () => {
+  useEffect(() => {
+    if (sessionStorage.getItem("visit_tracked")) return;
+    sessionStorage.setItem("visit_tracked", "1");
+    trackPageVisit();
+  }, []);
+
   const legalServiceJsonLd = {
     "@context": "https://schema.org",
     "@type": "LegalService",

@@ -21,18 +21,19 @@ import {
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 
-const navItems = [
+const navItemsAdmin = [
   { to: "/admin", icon: LayoutDashboard, label: "Inicio", end: true },
   { to: "/admin/ds160", icon: ClipboardList, label: "Solicitudes DS-160" },
   { to: "/admin/servicios", icon: Briefcase, label: "Servicios" },
   { to: "/admin/personal", icon: Users, label: "Personal del despacho" },
-  {
-    to: "/admin/usuarios",
-    icon: ShieldCheck,
-    label: "Cuentas internas",
-    adminOnly: true,
-  },
+  { to: "/admin/usuarios", icon: ShieldCheck, label: "Cuentas internas" },
   { to: "/admin/videos", icon: Video, label: "Videos" },
+  { to: "/admin/resenas", icon: Star, label: "Reseñas" },
+];
+
+const navItemsSecretary = [
+  { to: "/admin", icon: LayoutDashboard, label: "Inicio", end: true },
+  { to: "/admin/ds160", icon: ClipboardList, label: "Solicitudes DS-160" },
   { to: "/admin/resenas", icon: Star, label: "Reseñas" },
 ];
 
@@ -42,7 +43,7 @@ const SidebarContent = ({ onNavigate }: { onNavigate?: () => void }) => {
     <div className="flex flex-col h-full bg-primary text-primary-foreground">
       <div className="p-5 border-b border-primary-foreground/10">
         <Link to="/admin" className="font-serif text-lg font-bold block">
-          Panel Admin
+          {isAdmin ? "Panel Admin" : "Panel Secretaría"}
         </Link>
         <p className="text-xs text-primary-foreground/60 truncate mt-1">
           {user?.email}
@@ -50,9 +51,7 @@ const SidebarContent = ({ onNavigate }: { onNavigate?: () => void }) => {
       </div>
 
       <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
-        {navItems
-          .filter((i) => !i.adminOnly || isAdmin)
-          .map(({ to, icon: Icon, label, end }) => (
+        {(isAdmin ? navItemsAdmin : navItemsSecretary).map(({ to, icon: Icon, label, end }) => (
             <NavLink
               key={to}
               to={to}

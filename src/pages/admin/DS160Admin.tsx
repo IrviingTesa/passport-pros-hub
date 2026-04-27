@@ -18,9 +18,11 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { Loader2, Eye, Mail, Phone, MapPin, User, Calendar } from "lucide-react";
+import { Loader2, Eye, Mail, Phone, MapPin, User, Calendar, Lock } from "lucide-react";
 import { STATUS_LABELS } from "@/lib/ds160-options";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/contexts/AuthContext";
+import { useSecretaryEditPermission } from "@/hooks/useSecretaryEditPermission";
 
 interface Application {
   id: string;
@@ -46,6 +48,10 @@ const STATUS_TABS = [
 ];
 
 export default function DS160Admin() {
+  const { user, isAdmin, isSecretary } = useAuth();
+  const { hasActive: secretaryCanEdit } = useSecretaryEditPermission();
+  const canEdit = isAdmin || (isSecretary && secretaryCanEdit);
+
   const [items, setItems] = useState<Application[]>([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState("submitted");
@@ -97,6 +103,19 @@ export default function DS160Admin() {
           Pre-registros de visa americana enviados por los clientes.
         </p>
       </div>
+
+      {!canEdit && (
+        <Card className="border-accent/40 bg-accent/5">
+          <CardContent className="pt-4 pb-4 flex items-center gap-3 text-sm">
+            <Lock className="w-4 h-4 text-accent flex-shrink-0" />
+            <span>
+              Estás en modo <strong>solo lectura</strong>. Para editar el
+              estado de una solicitud, pide autorización al administrador
+              desde el panel de inicio.
+            </span>
+          </CardContent>
+        </Card>
+      )}
 
       <Tabs value={tab} onValueChange={setTab}>
         <TabsList className="flex-wrap h-auto">
@@ -167,7 +186,19 @@ export default function DS160Admin() {
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => setSelected(app)}
+                          onClick={() => {
+                            setSelected(app);
+                            if (user) {
+                              supabase
+                                .from("ds160_access_log")
+                                .insert({
+                                  user_id: user.id,
+                                  ds160_id: app.id,
+                                  ds160_full_name: app.full_name,
+                                })
+                                .then(() => {});
+                            }
+                          }}
                         >
                           <Eye className="w-4 h-4" /> Ver detalle
                         </Button>
@@ -200,7 +231,7 @@ export default function DS160Admin() {
                   <Select
                     value={selected.status}
                     onValueChange={(v) => updateStatus(selected.id, v)}
-                    disabled={updating}
+                    disabled={updating || !canEdit}
                   >
                     <SelectTrigger className="w-48">
                       <SelectValue />

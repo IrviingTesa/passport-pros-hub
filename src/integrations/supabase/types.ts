@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      ds160_access_log: {
+        Row: {
+          accessed_at: string
+          ds160_full_name: string | null
+          ds160_id: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          accessed_at?: string
+          ds160_full_name?: string | null
+          ds160_id: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          accessed_at?: string
+          ds160_full_name?: string | null
+          ds160_id?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       ds160_applications: {
         Row: {
           created_at: string
@@ -59,6 +83,69 @@ export type Database = {
           submitted_at?: string | null
           updated_at?: string
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      ds160_edit_requests: {
+        Row: {
+          admin_notes: string | null
+          created_at: string
+          hours_requested: number
+          id: string
+          reason: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          secretary_id: string
+          status: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          created_at?: string
+          hours_requested?: number
+          id?: string
+          reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          secretary_id: string
+          status?: string
+        }
+        Update: {
+          admin_notes?: string | null
+          created_at?: string
+          hours_requested?: number
+          id?: string
+          reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          secretary_id?: string
+          status?: string
+        }
+        Relationships: []
+      }
+      page_visits: {
+        Row: {
+          city: string | null
+          country: string | null
+          id: string
+          ip_hash: string | null
+          region: string | null
+          visited_at: string
+        }
+        Insert: {
+          city?: string | null
+          country?: string | null
+          id?: string
+          ip_hash?: string | null
+          region?: string | null
+          visited_at?: string
+        }
+        Update: {
+          city?: string | null
+          country?: string | null
+          id?: string
+          ip_hash?: string | null
+          region?: string | null
+          visited_at?: string
         }
         Relationships: []
       }
@@ -128,6 +215,39 @@ export type Database = {
           service_related?: string | null
           status?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      secretary_edit_permissions: {
+        Row: {
+          created_at: string
+          expires_at: string
+          granted_at: string
+          granted_by: string
+          id: string
+          notes: string | null
+          revoked_at: string | null
+          secretary_id: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at: string
+          granted_at?: string
+          granted_by: string
+          id?: string
+          notes?: string | null
+          revoked_at?: string | null
+          secretary_id: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          granted_at?: string
+          granted_by?: string
+          id?: string
+          notes?: string | null
+          revoked_at?: string | null
+          secretary_id?: string
         }
         Relationships: []
       }
@@ -291,6 +411,10 @@ export type Database = {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
+        Returns: boolean
+      }
+      secretary_has_active_edit_permission: {
+        Args: { _user_id: string }
         Returns: boolean
       }
       update_ds160_with_token: {
