@@ -43,7 +43,7 @@ const SidebarContent = ({ onNavigate }: { onNavigate?: () => void }) => {
     <div className="flex flex-col h-full bg-primary text-primary-foreground">
       <div className="p-5 border-b border-primary-foreground/10">
         <Link to="/admin" className="font-serif text-lg font-bold block">
-          Panel Admin
+          {isAdmin ? "Panel Admin" : "Panel Secretaría"}
         </Link>
         <p className="text-xs text-primary-foreground/60 truncate mt-1">
           {user?.email}
