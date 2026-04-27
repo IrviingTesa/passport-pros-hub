@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { ArrowLeft, Loader2 } from "lucide-react";
+import { SEO } from "@/components/SEO";
 
 const emailSchema = z.string().trim().email({ message: "Email inválido" }).max(255);
 const passwordSchema = z
@@ -112,6 +113,12 @@ export default function Auth() {
 
   return (
     <div className="min-h-screen bg-gradient-navy flex items-center justify-center p-4">
+      <SEO
+        title="Acceso Personal | Despacho Legal"
+        description="Acceso para administradores y personal del despacho."
+        canonical="/auth"
+        noindex
+      />
       <div className="w-full max-w-md">
         <Link
           to="/"
