@@ -30,7 +30,7 @@ const Index = () => {
     email: SITE_CONFIG.email,
     address: {
       "@type": "PostalAddress",
-      addressLocality: "Chilpancingo",
+      addressLocality: "Tecpán de Galeana",
       addressRegion: "Guerrero",
       addressCountry: "MX",
     },

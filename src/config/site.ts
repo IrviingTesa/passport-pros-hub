@@ -7,9 +7,9 @@ export const SITE_CONFIG = {
   // Número de WhatsApp en formato internacional sin "+", sin espacios.
   // Ej: México 52 + 10 dígitos -> "5217471234567"
   whatsappNumber: "525555555555",
-  email: "contacto@despacholegal.mx",
+  email: "asesoresmigratorios@gmail.com",
   phone: "+52 555 555 5555",
-  address: "Chilpancingo, Guerrero, México",
+  address: "Tecpán de Galeana, Guerrero, México",
   hours: "Lun – Vie: 9:00 – 18:00 · Sáb: 9:00 – 14:00",
   socials: {
     facebook: "#",
