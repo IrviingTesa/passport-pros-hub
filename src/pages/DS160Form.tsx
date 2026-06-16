@@ -12,18 +12,41 @@ import { Progress } from "@/components/ui/progress";
 import { Card, CardContent } from "@/components/ui/card";
 import { DS160Step1 } from "@/components/ds160/DS160Step1";
 import { DS160Step2 } from "@/components/ds160/DS160Step2";
+import { DS160Step3 } from "@/components/ds160/DS160Step3";
+import { DS160Step4 } from "@/components/ds160/DS160Step4";
+import { DS160Step5 } from "@/components/ds160/DS160Step5";
 import { SEO } from "@/components/SEO";
 import {
   step1Schema,
   step2Schema,
+  step3Schema,
+  step4Schema,
+  step5Schema,
   defaultStep1,
   defaultStep2,
+  defaultStep3,
+  defaultStep4,
+  defaultStep5,
   type Step1Data,
   type Step2Data,
+  type Step3Data,
+  type Step4Data,
+  type Step5Data,
   type DS160FormData,
 } from "@/lib/ds160-schema";
 
 const STORAGE_KEY = "ds160_draft";
+const TOTAL_STEPS = 5;
+
+type StepNum = 1 | 2 | 3 | 4 | 5;
+
+const STEP_LABELS: Record<StepNum, string> = {
+  1: "Datos personales",
+  2: "Contacto",
+  3: "Trabajo",
+  4: "Viajes",
+  5: "Contacto en EE.UU.",
+};
 
 interface DraftRef {
   id: string;
@@ -34,7 +57,7 @@ export default function DS160Form() {
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const { user } = useAuth();
-  const [step, setStep] = useState<1 | 2>(1);
+  const [step, setStep] = useState<StepNum>(1);
   const [submitting, setSubmitting] = useState(false);
   const [savingDraft, setSavingDraft] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -51,8 +74,23 @@ export default function DS160Form() {
     defaultValues: defaultStep2,
     mode: "onBlur",
   });
+  const step3Form = useForm<Step3Data>({
+    resolver: zodResolver(step3Schema),
+    defaultValues: defaultStep3,
+    mode: "onBlur",
+  });
+  const step4Form = useForm<Step4Data>({
+    resolver: zodResolver(step4Schema),
+    defaultValues: defaultStep4,
+    mode: "onBlur",
+  });
+  const step5Form = useForm<Step5Data>({
+    resolver: zodResolver(step5Schema),
+    defaultValues: defaultStep5,
+    mode: "onBlur",
+  });
 
-  // Cargar borrador existente (token en URL o localStorage)
+  // Cargar borrador existente
   useEffect(() => {
     const loadDraft = async () => {
       const urlId = params.get("id");
@@ -88,8 +126,12 @@ export default function DS160Form() {
             email_confirm: data.email || "",
           });
           step2Form.reset({ ...defaultStep2, ...fd });
+          step3Form.reset({ ...defaultStep3, ...fd });
+          step4Form.reset({ ...defaultStep4, ...fd });
+          step5Form.reset({ ...defaultStep5, ...fd });
           setDraftRef(ref);
-          setStep((data.current_step as 1 | 2) ?? 1);
+          const s = (data.current_step as StepNum) ?? 1;
+          setStep(s >= 1 && s <= TOTAL_STEPS ? s : 1);
           if (data.status === "submitted" || data.status === "in_review" || data.status === "completed") {
             setSubmitted(true);
           }
@@ -101,15 +143,22 @@ export default function DS160Form() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const persistDraft = async (
-    s1: Partial<Step1Data>,
-    s2: Partial<Step2Data>,
-    nextStep: 1 | 2,
-    finalize = false,
-  ) => {
+  const collectFormData = (): DS160FormData => {
+    const data: DS160FormData = {
+      ...step1Form.getValues(),
+      ...step2Form.getValues(),
+      ...step3Form.getValues(),
+      ...step4Form.getValues(),
+      ...step5Form.getValues(),
+    };
+    delete (data as { email_confirm?: string }).email_confirm;
+    return data;
+  };
+
+  const persistDraft = async (nextStep: StepNum, finalize = false) => {
     setSavingDraft(true);
-    const formData: DS160FormData = { ...s1, ...s2 };
-    delete (formData as { email_confirm?: string }).email_confirm;
+    const s1 = step1Form.getValues();
+    const formData = collectFormData();
 
     const payload = {
       email: s1.email || "",
@@ -123,7 +172,6 @@ export default function DS160Form() {
 
     try {
       if (draftRef) {
-        // Actualizar via RPC con token (funciona para invitado y usuario)
         const { data, error } = await supabase.rpc("update_ds160_with_token", {
           _id: draftRef.id,
           _edit_token: draftRef.edit_token,
@@ -161,30 +209,53 @@ export default function DS160Form() {
     }
   };
 
+  const validateCurrentStep = async (): Promise<boolean> => {
+    switch (step) {
+      case 1:
+        return step1Form.trigger();
+      case 2:
+        return step2Form.trigger();
+      case 3:
+        return step3Form.trigger();
+      case 4:
+        return step4Form.trigger();
+      case 5:
+        return step5Form.trigger();
+    }
+  };
+
   const handleNext = async () => {
-    const valid = await step1Form.trigger();
+    const valid = await validateCurrentStep();
     if (!valid) {
-      toast.error("Revisa los campos del paso 1");
+      toast.error(`Revisa los campos del paso ${step}`);
       return;
     }
+    const next = (step + 1) as StepNum;
     try {
-      await persistDraft(step1Form.getValues(), step2Form.getValues(), 2);
-      setStep(2);
+      await persistDraft(next);
+      setStep(next);
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch {
       // toast already shown
     }
   };
 
+  const handlePrev = () => {
+    if (step > 1) {
+      setStep((step - 1) as StepNum);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
   const handleSubmit = async () => {
-    const valid = await step2Form.trigger();
+    const valid = await validateCurrentStep();
     if (!valid) {
-      toast.error("Revisa los campos del paso 2");
+      toast.error(`Revisa los campos del paso ${step}`);
       return;
     }
     setSubmitting(true);
     try {
-      await persistDraft(step1Form.getValues(), step2Form.getValues(), 2, true);
+      await persistDraft(step, true);
       setSubmitted(true);
       if (!user) localStorage.removeItem(STORAGE_KEY);
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -235,7 +306,68 @@ export default function DS160Form() {
     );
   }
 
-  const progress = step === 1 ? 50 : 100;
+  const progress = (step / TOTAL_STEPS) * 100;
+  const isLast = step === TOTAL_STEPS;
+
+  const renderStep = () => {
+    switch (step) {
+      case 1:
+        return (
+          <FormProvider {...step1Form}>
+            <Form {...step1Form}>
+              <form onSubmit={(e) => { e.preventDefault(); handleNext(); }} className="space-y-6">
+                <DS160Step1 />
+                <StepNav onPrev={null} loading={savingDraft} isLast={false} />
+              </form>
+            </Form>
+          </FormProvider>
+        );
+      case 2:
+        return (
+          <FormProvider {...step2Form}>
+            <Form {...step2Form}>
+              <form onSubmit={(e) => { e.preventDefault(); handleNext(); }} className="space-y-6">
+                <DS160Step2 />
+                <StepNav onPrev={handlePrev} loading={savingDraft} isLast={false} />
+              </form>
+            </Form>
+          </FormProvider>
+        );
+      case 3:
+        return (
+          <FormProvider {...step3Form}>
+            <Form {...step3Form}>
+              <form onSubmit={(e) => { e.preventDefault(); handleNext(); }} className="space-y-6">
+                <DS160Step3 />
+                <StepNav onPrev={handlePrev} loading={savingDraft} isLast={false} />
+              </form>
+            </Form>
+          </FormProvider>
+        );
+      case 4:
+        return (
+          <FormProvider {...step4Form}>
+            <Form {...step4Form}>
+              <form onSubmit={(e) => { e.preventDefault(); handleNext(); }} className="space-y-6">
+                <DS160Step4 />
+                <StepNav onPrev={handlePrev} loading={savingDraft} isLast={false} />
+              </form>
+            </Form>
+          </FormProvider>
+        );
+      case 5:
+        return (
+          <FormProvider {...step5Form}>
+            <Form {...step5Form}>
+              <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }} className="space-y-6">
+                <DS160Step5 />
+                <StepNav onPrev={handlePrev} loading={submitting} isLast={true} />
+              </form>
+            </Form>
+          </FormProvider>
+        );
+    }
+  };
 
   return (
     <div className="min-h-screen bg-secondary/30 section-padding">
@@ -263,75 +395,28 @@ export default function DS160Form() {
             Visa Americana
           </h1>
           <p className="text-muted-foreground max-w-xl mx-auto">
-            Completa solo lo esencial. Nuestro equipo se encarga del resto del
-            formulario oficial DS-160 y te contactará para revisar tu solicitud.
+            Completa los pasos. Tu progreso se guarda automáticamente.
           </p>
         </div>
 
         <div className="mb-6">
-          <div className="flex justify-between text-sm font-medium text-muted-foreground mb-2">
-            <span className={step === 1 ? "text-primary font-bold" : ""}>
-              1. Datos personales
-            </span>
-            <span className={step === 2 ? "text-primary font-bold" : ""}>
-              2. Datos de contacto
-            </span>
+          <div className="flex justify-between text-xs sm:text-sm font-medium text-muted-foreground mb-2 gap-1">
+            {([1, 2, 3, 4, 5] as StepNum[]).map((n) => (
+              <span
+                key={n}
+                className={`flex-1 text-center truncate ${
+                  step === n ? "text-primary font-bold" : ""
+                }`}
+              >
+                {n}. {STEP_LABELS[n]}
+              </span>
+            ))}
           </div>
           <Progress value={progress} className="h-2" />
         </div>
 
         <Card>
-          <CardContent className="pt-6">
-            {step === 1 ? (
-              <FormProvider {...step1Form}>
-                <Form {...step1Form}>
-                  <form
-                    onSubmit={(e) => {
-                      e.preventDefault();
-                      handleNext();
-                    }}
-                    className="space-y-6"
-                  >
-                    <DS160Step1 />
-                    <div className="flex justify-end pt-4 border-t">
-                      <Button type="submit" variant="default" disabled={savingDraft}>
-                        {savingDraft && <Loader2 className="w-4 h-4 animate-spin" />}
-                        Siguiente <ArrowRight className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </form>
-                </Form>
-              </FormProvider>
-            ) : (
-              <FormProvider {...step2Form}>
-                <Form {...step2Form}>
-                  <form
-                    onSubmit={(e) => {
-                      e.preventDefault();
-                      handleSubmit();
-                    }}
-                    className="space-y-6"
-                  >
-                    <DS160Step2 />
-                    <div className="flex justify-between pt-4 border-t">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => setStep(1)}
-                        disabled={submitting}
-                      >
-                        <ArrowLeft className="w-4 h-4" /> Anterior
-                      </Button>
-                      <Button type="submit" variant="gold" disabled={submitting}>
-                        {submitting && <Loader2 className="w-4 h-4 animate-spin" />}
-                        Enviar solicitud
-                      </Button>
-                    </div>
-                  </form>
-                </Form>
-              </FormProvider>
-            )}
-          </CardContent>
+          <CardContent className="pt-6">{renderStep()}</CardContent>
         </Card>
 
         {!user && (
@@ -345,6 +430,36 @@ export default function DS160Form() {
           </p>
         )}
       </div>
+    </div>
+  );
+}
+
+function StepNav({
+  onPrev,
+  loading,
+  isLast,
+}: {
+  onPrev: (() => void) | null;
+  loading: boolean;
+  isLast: boolean;
+}) {
+  return (
+    <div className="flex justify-between pt-4 border-t">
+      {onPrev ? (
+        <Button type="button" variant="outline" onClick={onPrev} disabled={loading}>
+          <ArrowLeft className="w-4 h-4" /> Anterior
+        </Button>
+      ) : (
+        <span />
+      )}
+      <Button type="submit" variant={isLast ? "gold" : "default"} disabled={loading}>
+        {loading && <Loader2 className="w-4 h-4 animate-spin" />}
+        {isLast ? "Enviar solicitud" : (
+          <>
+            Siguiente <ArrowRight className="w-4 h-4" />
+          </>
+        )}
+      </Button>
     </div>
   );
 }
