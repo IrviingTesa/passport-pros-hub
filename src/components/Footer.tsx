@@ -23,8 +23,8 @@ export const Footer = () => {
               </div>
             </div>
             <p className="text-primary-foreground/70 text-sm leading-relaxed mb-4">
-              Tu despacho de confianza para trámites legales y migratorios en
-              México.
+              Tus asesores migratorios de confianza para trámites legales y
+              migratorios en México.
             </p>
             <div className="flex gap-3">
               {[

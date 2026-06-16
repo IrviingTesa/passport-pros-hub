@@ -25,7 +25,7 @@ const navItemsAdmin = [
   { to: "/admin", icon: LayoutDashboard, label: "Inicio", end: true },
   { to: "/admin/ds160", icon: ClipboardList, label: "Solicitudes DS-160" },
   { to: "/admin/servicios", icon: Briefcase, label: "Servicios" },
-  { to: "/admin/personal", icon: Users, label: "Personal del despacho" },
+  { to: "/admin/personal", icon: Users, label: "Personal" },
   { to: "/admin/usuarios", icon: ShieldCheck, label: "Cuentas internas" },
   { to: "/admin/videos", icon: Video, label: "Videos" },
   { to: "/admin/resenas", icon: Star, label: "Reseñas" },

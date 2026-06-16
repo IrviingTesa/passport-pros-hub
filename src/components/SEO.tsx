@@ -11,7 +11,7 @@ interface SEOProps {
 }
 
 const SITE_URL =
-  typeof window !== "undefined" ? window.location.origin : "https://despacholegal.mx";
+  typeof window !== "undefined" ? window.location.origin : "https://asesoresmigratorios.mx";
 const DEFAULT_IMAGE = `${SITE_URL}/og-image.jpg`;
 
 export const SEO = ({

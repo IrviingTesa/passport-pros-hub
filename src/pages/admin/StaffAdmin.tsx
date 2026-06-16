@@ -157,7 +157,7 @@ export default function StaffAdmin() {
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h1 className="font-serif text-3xl font-bold text-primary">
-            Personal del despacho
+            Personal de Asesores Migratorios
           </h1>
           <p className="text-muted-foreground mt-1">
             Quienes aparecerán en la sección "Conoce al equipo" del sitio público.

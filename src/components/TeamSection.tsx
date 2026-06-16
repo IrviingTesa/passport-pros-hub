@@ -61,7 +61,7 @@ export const TeamSection = () => {
             Nuestro equipo
           </span>
           <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold text-primary mb-4">
-            Conoce al equipo del despacho
+            Conoce a nuestro equipo
           </h2>
           <p className="text-muted-foreground text-lg">
             Profesionales comprometidos con resolver tus trámites de forma ágil
