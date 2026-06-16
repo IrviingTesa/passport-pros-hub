@@ -2,7 +2,7 @@
 // Por ahora, edita aquí el número de WhatsApp y los servicios.
 
 export const SITE_CONFIG = {
-  brandName: "Despacho Legal & Trámites",
+  brandName: "Asesores Migratorios",
   brandTagline: "Pasaportes · Visas · Apostillas · Actas",
   // Número de WhatsApp en formato internacional sin "+", sin espacios.
   // Ej: México 52 + 10 dígitos -> "5217471234567"
