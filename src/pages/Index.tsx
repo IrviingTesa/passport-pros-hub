@@ -25,7 +25,7 @@ const Index = () => {
     "@type": "LegalService",
     name: SITE_CONFIG.brandName,
     description:
-      "Despacho profesional en México: pasaportes, visas B1/B2, DS-160, apostillas, actas y traducciones certificadas.",
+      "Asesores migratorios en México: pasaportes, visas B1/B2, DS-160, apostillas, actas y traducciones certificadas.",
     telephone: SITE_CONFIG.phone,
     email: SITE_CONFIG.email,
     address: {
@@ -50,7 +50,7 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <SEO
         title="Trámites Legales y Visas | Pasaportes, DS-160, Apostillas"
-        description="Despacho profesional en México: pasaportes, visas B1/B2, DS-160, apostillas, actas y traducciones certificadas. Atención por WhatsApp."
+        description="Asesores migratorios en México: pasaportes, visas B1/B2, DS-160, apostillas, actas y traducciones certificadas. Atención por WhatsApp."
         canonical="/"
         jsonLd={[legalServiceJsonLd, websiteJsonLd]}
       />

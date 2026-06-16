@@ -241,7 +241,7 @@ export default function DS160Form() {
     <div className="min-h-screen bg-secondary/30 section-padding">
       <SEO
         title="Pre-registro DS-160 | Visa Americana B1/B2"
-        description="Inicia tu pre-registro DS-160 para visa americana. Guardado automático y atención personalizada por nuestro despacho."
+        description="Inicia tu pre-registro DS-160 para visa americana. Guardado automático y atención personalizada."
         canonical="/ds160"
       />
       <div className="container max-w-3xl mx-auto">

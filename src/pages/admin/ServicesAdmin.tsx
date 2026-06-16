@@ -135,7 +135,7 @@ export default function ServicesAdmin() {
         <div>
           <h1 className="font-serif text-3xl font-bold text-primary">Servicios</h1>
           <p className="text-muted-foreground mt-1">
-            Gestiona el catálogo de servicios del despacho.
+            Gestiona el catálogo de servicios.
           </p>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>

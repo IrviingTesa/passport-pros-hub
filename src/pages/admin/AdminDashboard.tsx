@@ -147,7 +147,7 @@ export default function AdminDashboard() {
       <div>
         <h1 className="font-serif text-3xl font-bold text-primary">Inicio</h1>
         <p className="text-muted-foreground mt-1">
-          Resumen general del despacho.&nbsp;
+          Resumen general de Asesores Migratorios.&nbsp;
           {roles.length > 0 && (
             <>
               Tu rol:&nbsp;

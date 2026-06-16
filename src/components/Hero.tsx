@@ -27,7 +27,7 @@ export const Hero = () => {
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-accent/15 border border-accent/30 backdrop-blur-sm mb-6">
             <ShieldCheck className="w-4 h-4 text-accent" />
             <span className="text-accent text-sm font-medium tracking-wide">
-              Despacho con experiencia comprobada
+              Asesores migratorios con experiencia comprobada
             </span>
           </div>
 
