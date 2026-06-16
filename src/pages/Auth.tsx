@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowLeft, Loader2, Eye, EyeOff } from "lucide-react";
 import { SEO } from "@/components/SEO";
 
 const emailSchema = z.string().trim().email({ message: "Email inválido" }).max(255);
@@ -28,6 +28,8 @@ export default function Auth() {
   const { user, loading: authLoading } = useAuth();
   const [tab, setTab] = useState<"login" | "signup">("login");
   const [busy, setBusy] = useState(false);
+  const [showLoginPass, setShowLoginPass] = useState(false);
+  const [showSignupPass, setShowSignupPass] = useState(false);
 
   // Form state
   const [email, setEmail] = useState("");
@@ -114,8 +116,8 @@ export default function Auth() {
   return (
     <div className="min-h-screen bg-gradient-navy flex items-center justify-center p-4">
       <SEO
-        title="Acceso Personal | Despacho Legal"
-        description="Acceso para administradores y personal del despacho."
+        title="Acceso Personal | Asesores Migratorios"
+        description="Acceso para administradores y personal de Asesores Migratorios."
         canonical="/auth"
         noindex
       />
@@ -131,7 +133,7 @@ export default function Auth() {
           <CardHeader className="text-center">
             <CardTitle className="font-serif text-2xl">Acceso Personal</CardTitle>
             <CardDescription>
-              Solo para administradores y secretarias del despacho.
+              Solo para administradores y secretarias.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -156,14 +158,26 @@ export default function Auth() {
                   </div>
                   <div className="space-y-1.5">
                     <Label htmlFor="login-pass">Contraseña</Label>
-                    <Input
-                      id="login-pass"
-                      type="password"
-                      autoComplete="current-password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                    />
+                    <div className="relative">
+                      <Input
+                        id="login-pass"
+                        type={showLoginPass ? "text" : "password"}
+                        autoComplete="current-password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                        className="pr-10"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowLoginPass((v) => !v)}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground p-1"
+                        aria-label={showLoginPass ? "Ocultar contraseña" : "Mostrar contraseña"}
+                        tabIndex={-1}
+                      >
+                        {showLoginPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
                   </div>
                   <Button type="submit" className="w-full" disabled={busy}>
                     {busy && <Loader2 className="w-4 h-4 animate-spin" />}
@@ -198,14 +212,26 @@ export default function Auth() {
                   </div>
                   <div className="space-y-1.5">
                     <Label htmlFor="su-pass">Contraseña</Label>
-                    <Input
-                      id="su-pass"
-                      type="password"
-                      autoComplete="new-password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                    />
+                    <div className="relative">
+                      <Input
+                        id="su-pass"
+                        type={showSignupPass ? "text" : "password"}
+                        autoComplete="new-password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                        className="pr-10"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowSignupPass((v) => !v)}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground p-1"
+                        aria-label={showSignupPass ? "Ocultar contraseña" : "Mostrar contraseña"}
+                        tabIndex={-1}
+                      >
+                        {showSignupPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
                     <p className="text-xs text-muted-foreground">
                       Mínimo 8 caracteres.
                     </p>
