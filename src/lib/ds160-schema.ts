@@ -71,9 +71,106 @@ export const step2Schema = z
     },
   );
 
+// Paso 3 — Trabajo
+export const step3Schema = z.object({
+  work_place: trimmed(150, "Lugar donde trabaja"),
+  work_position: trimmed(100, "Puesto"),
+  work_address: trimmed(250, "Dirección de la empresa"),
+  work_monthly_salary: trimmed(30, "Sueldo mensual aproximado"),
+  work_phone: trimmed(25, "Teléfono de la empresa").regex(
+    /^[0-9+\s()-]+$/,
+    "Teléfono inválido",
+  ),
+  work_start_date: trimmed(10, "Fecha de ingreso"),
+});
+
+// Paso 4 — Viajes / Renovación
+export const step4Schema = z
+  .object({
+    is_renewal: z.enum(["no", "yes"]),
+    last_trip_date: optionalTrimmed(10),
+    cities_visited: optionalTrimmed(300),
+    stay_duration: optionalTrimmed(100),
+  })
+  .refine(
+    (d) =>
+      d.is_renewal === "no" ||
+      (d.last_trip_date && d.last_trip_date.length > 0),
+    { message: "Fecha del último viaje", path: ["last_trip_date"] },
+  )
+  .refine(
+    (d) =>
+      d.is_renewal === "no" ||
+      (d.cities_visited && d.cities_visited.length > 0),
+    { message: "Indica las ciudades visitadas", path: ["cities_visited"] },
+  )
+  .refine(
+    (d) =>
+      d.is_renewal === "no" ||
+      (d.stay_duration && d.stay_duration.length > 0),
+    { message: "Tiempo de estancia", path: ["stay_duration"] },
+  );
+
+// Paso 5 — Contacto en EE.UU.
+export const step5Schema = z
+  .object({
+    us_contact_type: z.enum(["family", "hotel"], {
+      required_error: "Selecciona tipo de contacto",
+    }),
+    // family
+    us_family_full_name: optionalTrimmed(150),
+    us_family_relationship: optionalTrimmed(80),
+    us_family_address: optionalTrimmed(250),
+    us_family_phone: optionalTrimmed(25),
+    us_family_status: optionalTrimmed(80),
+    // hotel
+    us_hotel_name: optionalTrimmed(150),
+    us_hotel_address: optionalTrimmed(250),
+  })
+  .superRefine((d, ctx) => {
+    if (d.us_contact_type === "family") {
+      const fields: Array<keyof typeof d> = [
+        "us_family_full_name",
+        "us_family_relationship",
+        "us_family_address",
+        "us_family_phone",
+        "us_family_status",
+      ];
+      for (const f of fields) {
+        if (!d[f] || (d[f] as string).length === 0) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: [f],
+            message: "Campo requerido",
+          });
+        }
+      }
+    } else if (d.us_contact_type === "hotel") {
+      if (!d.us_hotel_name || d.us_hotel_name.length === 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["us_hotel_name"],
+          message: "Nombre del hotel",
+        });
+      }
+      if (!d.us_hotel_address || d.us_hotel_address.length === 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["us_hotel_address"],
+          message: "Dirección del hotel",
+        });
+      }
+    }
+  });
+
 export type Step1Data = z.infer<typeof step1Schema>;
 export type Step2Data = z.infer<typeof step2Schema>;
-export type DS160FormData = Partial<Step1Data & Step2Data>;
+export type Step3Data = z.infer<typeof step3Schema>;
+export type Step4Data = z.infer<typeof step4Schema>;
+export type Step5Data = z.infer<typeof step5Schema>;
+export type DS160FormData = Partial<
+  Step1Data & Step2Data & Step3Data & Step4Data & Step5Data
+>;
 
 export const defaultStep1: Step1Data = {
   purpose_of_trip: "",
@@ -107,4 +204,31 @@ export const defaultStep2: Step2Data = {
   other_phones: "",
   traveling_with_others: "no",
   travel_companions: "",
+};
+
+export const defaultStep3: Step3Data = {
+  work_place: "",
+  work_position: "",
+  work_address: "",
+  work_monthly_salary: "",
+  work_phone: "",
+  work_start_date: "",
+};
+
+export const defaultStep4: Step4Data = {
+  is_renewal: "no",
+  last_trip_date: "",
+  cities_visited: "",
+  stay_duration: "",
+};
+
+export const defaultStep5: Step5Data = {
+  us_contact_type: "family",
+  us_family_full_name: "",
+  us_family_relationship: "",
+  us_family_address: "",
+  us_family_phone: "",
+  us_family_status: "",
+  us_hotel_name: "",
+  us_hotel_address: "",
 };
