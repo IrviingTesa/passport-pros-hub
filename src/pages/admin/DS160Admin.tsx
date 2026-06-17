@@ -304,6 +304,52 @@ export default function DS160Admin() {
                   />
                   <DetailRow label="Acompañantes" value={fd(selected, "travel_companions")} />
                 </DetailSection>
+
+                <DetailSection title="Trabajo" icon={User}>
+                  <DetailRow label="Lugar donde trabaja" value={fd(selected, "work_place")} />
+                  <DetailRow label="Puesto" value={fd(selected, "work_position")} />
+                  <DetailRow label="Dirección de la empresa" value={fd(selected, "work_address")} />
+                  <DetailRow label="Sueldo mensual" value={fd(selected, "work_monthly_salary")} />
+                  <DetailRow label="Teléfono empresa" value={fd(selected, "work_phone")} />
+                  <DetailRow label="Fecha de ingreso" value={fd(selected, "work_start_date")} />
+                </DetailSection>
+
+                <DetailSection title="Viajes / Renovación" icon={Calendar}>
+                  <DetailRow
+                    label="¿Es renovación?"
+                    value={fd(selected, "is_renewal") === "yes" ? "Sí" : "No"}
+                  />
+                  <DetailRow label="Fecha último viaje" value={fd(selected, "last_trip_date")} />
+                  <DetailRow label="Ciudades visitadas" value={fd(selected, "cities_visited")} />
+                  <DetailRow label="Tiempo de estancia" value={fd(selected, "stay_duration")} />
+                </DetailSection>
+
+                <DetailSection title="Contacto en EE.UU." icon={MapPin}>
+                  <DetailRow
+                    label="Tipo de contacto"
+                    value={
+                      fd(selected, "us_contact_type") === "family"
+                        ? "Familiar / conocido"
+                        : fd(selected, "us_contact_type") === "hotel"
+                          ? "Hotel"
+                          : null
+                    }
+                  />
+                  {fd(selected, "us_contact_type") === "family" ? (
+                    <>
+                      <DetailRow label="Nombre completo" value={fd(selected, "us_family_full_name")} />
+                      <DetailRow label="Parentesco" value={fd(selected, "us_family_relationship")} />
+                      <DetailRow label="Dirección" value={fd(selected, "us_family_address")} />
+                      <DetailRow label="Teléfono" value={fd(selected, "us_family_phone")} />
+                      <DetailRow label="Estatus migratorio" value={fd(selected, "us_family_status")} />
+                    </>
+                  ) : (
+                    <>
+                      <DetailRow label="Nombre del hotel" value={fd(selected, "us_hotel_name")} />
+                      <DetailRow label="Dirección del hotel" value={fd(selected, "us_hotel_address")} />
+                    </>
+                  )}
+                </DetailSection>
               </div>
             </>
           )}
