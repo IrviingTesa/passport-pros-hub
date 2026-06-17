@@ -35,7 +35,12 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Plus, Trash2, Loader2, ShieldAlert, KeyRound } from "lucide-react";
+import { Plus, Trash2, Loader2, ShieldAlert, KeyRound, Copy } from "lucide-react";
+
+interface ResetResult {
+  email: string;
+  password: string;
+}
 
 interface InternalUser {
   id: string;

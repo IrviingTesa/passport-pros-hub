@@ -1,11 +1,10 @@
 // Edge Function: manage-users
-// Solo admins pueden invocarla. Permite:
-//   - list: listar todos los usuarios con sus roles y perfil
-//   - create: crear usuario (email + password + nombre + rol)
-//   - update_role: cambiar el rol de un usuario
-//   - delete: eliminar usuario
-//
-// Verifica el JWT del invocador y comprueba el rol admin antes de actuar.
+// Solo admins. Acciones:
+//   - list
+//   - create
+//   - update_role
+//   - delete
+//   - reset_password (genera contraseña temporal y la devuelve al admin)
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
@@ -25,10 +24,23 @@ type Action =
       role: "admin" | "secretary";
     }
   | { type: "update_role"; user_id: string; role: "admin" | "secretary" }
-  | { type: "delete"; user_id: string };
+  | { type: "delete"; user_id: string }
+  | { type: "reset_password"; user_id: string };
 
 function isValidEmail(s: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s) && s.length <= 255;
+}
+
+function generateTempPassword() {
+  const lower = "abcdefghijkmnpqrstuvwxyz";
+  const upper = "ABCDEFGHJKLMNPQRSTUVWXYZ";
+  const digits = "23456789";
+  const symbols = "!@#$%&*";
+  const all = lower + upper + digits + symbols;
+  const rand = (s: string) => s[Math.floor(Math.random() * s.length)];
+  let pwd = rand(upper) + rand(lower) + rand(digits) + rand(symbols);
+  for (let i = 0; i < 8; i++) pwd += rand(all);
+  return pwd;
 }
 
 Deno.serve(async (req) => {
@@ -49,7 +61,6 @@ Deno.serve(async (req) => {
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
 
-    // Cliente con el JWT del invocador para identificarlo
     const userClient = createClient(supabaseUrl, anonKey, {
       global: { headers: { Authorization: authHeader } },
     });
@@ -64,10 +75,8 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Cliente admin (service role) para operaciones privilegiadas
     const admin = createClient(supabaseUrl, serviceKey);
 
-    // Verificar rol admin
     const { data: roleRow } = await admin
       .from("user_roles")
       .select("role")
@@ -160,7 +169,6 @@ Deno.serve(async (req) => {
             status: 400,
             headers: { ...corsHeaders, "Content-Type": "application/json" },
           });
-        // Reemplazar todos los roles del usuario por el nuevo
         await admin.from("user_roles").delete().eq("user_id", body.user_id);
         const { error: insErr } = await admin
           .from("user_roles")
@@ -185,6 +193,25 @@ Deno.serve(async (req) => {
         return new Response(JSON.stringify({ ok: true }), {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
+      }
+
+      case "reset_password": {
+        if (!body.user_id) {
+          return new Response(JSON.stringify({ error: "user_id requerido" }), {
+            status: 400,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+        const newPassword = generateTempPassword();
+        const { error: updErr } = await admin.auth.admin.updateUserById(
+          body.user_id,
+          { password: newPassword },
+        );
+        if (updErr) throw updErr;
+        return new Response(
+          JSON.stringify({ ok: true, password: newPassword }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
       }
 
       default:

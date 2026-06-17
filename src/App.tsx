@@ -11,9 +11,10 @@ import DS160Form from "./pages/DS160Form.tsx";
 import AdminLayout from "./pages/admin/AdminLayout.tsx";
 import AdminDashboard from "./pages/admin/AdminDashboard.tsx";
 import ServicesAdmin from "./pages/admin/ServicesAdmin.tsx";
+import CategoriesAdmin from "./pages/admin/CategoriesAdmin.tsx";
 import StaffAdmin from "./pages/admin/StaffAdmin.tsx";
 import UsersAdmin from "./pages/admin/UsersAdmin.tsx";
-import VideosAdmin from "./pages/admin/VideosAdmin.tsx";
+import SocialMediaAdmin from "./pages/admin/SocialMediaAdmin.tsx";
 import ReviewsAdmin from "./pages/admin/ReviewsAdmin.tsx";
 import DS160Admin from "./pages/admin/DS160Admin.tsx";
 import NotFound from "./pages/NotFound.tsx";
@@ -40,6 +41,7 @@ const App = () => (
               }
             >
               <Route index element={<AdminDashboard />} />
+              <Route path="categorias" element={<CategoriesAdmin />} />
               <Route path="servicios" element={<ServicesAdmin />} />
               <Route path="personal" element={<StaffAdmin />} />
               <Route
@@ -50,7 +52,8 @@ const App = () => (
                   </ProtectedRoute>
                 }
               />
-              <Route path="videos" element={<VideosAdmin />} />
+              <Route path="redes-sociales" element={<SocialMediaAdmin />} />
+              <Route path="videos" element={<SocialMediaAdmin />} />
               <Route path="resenas" element={<ReviewsAdmin />} />
               <Route path="ds160" element={<DS160Admin />} />
             </Route>

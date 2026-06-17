@@ -37,19 +37,26 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { Pencil, Plus, Trash2, Loader2 } from "lucide-react";
-import { SERVICE_CATEGORIES } from "@/config/site";
+import { Link } from "react-router-dom";
+
+interface Category {
+  id: string;
+  name: string;
+  is_active: boolean;
+}
 
 interface Service {
   id: string;
   category: string;
+  category_id: string | null;
   name: string;
   short_description: string | null;
   display_order: number;
   is_active: boolean;
 }
 
-const emptyForm: Omit<Service, "id"> = {
-  category: SERVICE_CATEGORIES[0]?.title ?? "",
+const emptyForm = {
+  category_id: "",
   name: "",
   short_description: "",
   display_order: 0,
@@ -58,6 +65,7 @@ const emptyForm: Omit<Service, "id"> = {
 
 export default function ServicesAdmin() {
   const [items, setItems] = useState<Service[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Service | null>(null);
@@ -66,12 +74,20 @@ export default function ServicesAdmin() {
 
   const load = async () => {
     setLoading(true);
-    const { data, error } = await supabase
-      .from("services")
-      .select("*")
-      .order("display_order", { ascending: true });
-    if (error) toast.error(error.message);
-    setItems((data as Service[]) ?? []);
+    const [svcRes, catRes] = await Promise.all([
+      supabase
+        .from("services")
+        .select("*")
+        .order("display_order", { ascending: true }),
+      supabase
+        .from("service_categories" as never)
+        .select("id, name, is_active")
+        .order("display_order", { ascending: true }),
+    ]);
+    if (svcRes.error) toast.error(svcRes.error.message);
+    if (catRes.error) toast.error(catRes.error.message);
+    setItems(((svcRes.data as unknown) as Service[]) ?? []);
+    setCategories(((catRes.data as unknown) as Category[]) ?? []);
     setLoading(false);
   };
 
@@ -81,14 +97,14 @@ export default function ServicesAdmin() {
 
   const openCreate = () => {
     setEditing(null);
-    setForm(emptyForm);
+    setForm({ ...emptyForm, category_id: categories[0]?.id ?? "" });
     setOpen(true);
   };
 
   const openEdit = (s: Service) => {
     setEditing(s);
     setForm({
-      category: s.category,
+      category_id: s.category_id ?? "",
       name: s.name,
       short_description: s.short_description ?? "",
       display_order: s.display_order,
@@ -98,24 +114,33 @@ export default function ServicesAdmin() {
   };
 
   const save = async () => {
-    if (!form.name.trim() || !form.category.trim()) {
-      toast.error("Categoría y nombre son obligatorios");
+    if (!form.name.trim()) {
+      toast.error("Nombre obligatorio");
+      return;
+    }
+    if (!form.category_id) {
+      toast.error("Selecciona una categoría");
+      return;
+    }
+    const cat = categories.find((c) => c.id === form.category_id);
+    if (!cat) {
+      toast.error("Categoría inválida");
       return;
     }
     setBusy(true);
     const payload = {
-      ...form,
+      category: cat.name, // legacy text column
+      category_id: form.category_id,
       name: form.name.trim(),
       short_description: form.short_description?.trim() || null,
+      display_order: form.display_order,
+      is_active: form.is_active,
     };
     const { error } = editing
       ? await supabase.from("services").update(payload).eq("id", editing.id)
       : await supabase.from("services").insert(payload);
     setBusy(false);
-    if (error) {
-      toast.error(error.message);
-      return;
-    }
+    if (error) return toast.error(error.message);
     toast.success(editing ? "Servicio actualizado" : "Servicio creado");
     setOpen(false);
     load();
@@ -135,12 +160,18 @@ export default function ServicesAdmin() {
         <div>
           <h1 className="font-serif text-3xl font-bold text-primary">Servicios</h1>
           <p className="text-muted-foreground mt-1">
-            Gestiona el catálogo de servicios.
+            Gestiona el catálogo de servicios.{" "}
+            <Link
+              to="/admin/categorias"
+              className="text-accent underline underline-offset-2"
+            >
+              Administrar categorías
+            </Link>
           </p>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <Button onClick={openCreate}>
+            <Button onClick={openCreate} disabled={categories.length === 0}>
               <Plus className="w-4 h-4" /> Nuevo servicio
             </Button>
           </DialogTrigger>
@@ -154,16 +185,16 @@ export default function ServicesAdmin() {
               <div>
                 <Label>Categoría</Label>
                 <Select
-                  value={form.category}
-                  onValueChange={(v) => setForm({ ...form, category: v })}
+                  value={form.category_id}
+                  onValueChange={(v) => setForm({ ...form, category_id: v })}
                 >
                   <SelectTrigger>
-                    <SelectValue />
+                    <SelectValue placeholder="Selecciona…" />
                   </SelectTrigger>
                   <SelectContent>
-                    {SERVICE_CATEGORIES.map((c) => (
-                      <SelectItem key={c.id} value={c.title}>
-                        {c.title}
+                    {categories.map((c) => (
+                      <SelectItem key={c.id} value={c.id}>
+                        {c.name} {!c.is_active && "(inactiva)"}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -181,7 +212,7 @@ export default function ServicesAdmin() {
               <div>
                 <Label>Descripción corta (opcional)</Label>
                 <Textarea
-                  value={form.short_description ?? ""}
+                  value={form.short_description}
                   onChange={(e) =>
                     setForm({ ...form, short_description: e.target.value })
                   }
@@ -225,6 +256,18 @@ export default function ServicesAdmin() {
         </Dialog>
       </div>
 
+      {categories.length === 0 && !loading && (
+        <Card className="border-accent/40 bg-accent/5">
+          <CardContent className="pt-4 pb-4 text-sm">
+            Primero crea al menos una <strong>categoría</strong> desde{" "}
+            <Link to="/admin/categorias" className="text-accent underline">
+              Categorías
+            </Link>{" "}
+            para poder agregar servicios.
+          </CardContent>
+        </Card>
+      )}
+
       <Card>
         <CardHeader>
           <CardTitle className="text-base">Catálogo</CardTitle>
@@ -236,7 +279,7 @@ export default function ServicesAdmin() {
             </div>
           ) : items.length === 0 ? (
             <div className="py-12 text-center text-muted-foreground text-sm">
-              Aún no hay servicios. Crea el primero con el botón superior.
+              Aún no hay servicios.
             </div>
           ) : (
             <Table>
@@ -250,43 +293,48 @@ export default function ServicesAdmin() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {items.map((s) => (
-                  <TableRow key={s.id}>
-                    <TableCell className="text-sm text-muted-foreground">
-                      {s.category}
-                    </TableCell>
-                    <TableCell>
-                      <div className="font-medium">{s.name}</div>
-                      {s.short_description && (
-                        <div className="text-xs text-muted-foreground mt-0.5">
-                          {s.short_description}
-                        </div>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-center">{s.display_order}</TableCell>
-                    <TableCell className="text-center">
-                      <Badge variant={s.is_active ? "default" : "secondary"}>
-                        {s.is_active ? "Activo" : "Inactivo"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        onClick={() => openEdit(s)}
-                      >
-                        <Pencil className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        onClick={() => remove(s.id)}
-                      >
-                        <Trash2 className="w-4 h-4 text-destructive" />
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {items.map((s) => {
+                  const cat = categories.find((c) => c.id === s.category_id);
+                  return (
+                    <TableRow key={s.id}>
+                      <TableCell className="text-sm text-muted-foreground">
+                        {cat?.name ?? s.category ?? "—"}
+                      </TableCell>
+                      <TableCell>
+                        <div className="font-medium">{s.name}</div>
+                        {s.short_description && (
+                          <div className="text-xs text-muted-foreground mt-0.5">
+                            {s.short_description}
+                          </div>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-center">
+                        {s.display_order}
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <Badge variant={s.is_active ? "default" : "secondary"}>
+                          {s.is_active ? "Activo" : "Inactivo"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          onClick={() => openEdit(s)}
+                        >
+                          <Pencil className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          onClick={() => remove(s.id)}
+                        >
+                          <Trash2 className="w-4 h-4 text-destructive" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
           )}

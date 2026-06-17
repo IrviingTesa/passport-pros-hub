@@ -4,12 +4,13 @@ import {
   Briefcase,
   Users,
   ShieldCheck,
-  Video,
+  Share2,
   Star,
   LogOut,
   Home,
   Menu,
   ClipboardList,
+  Tags,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -24,10 +25,11 @@ import { useState } from "react";
 const navItemsAdmin = [
   { to: "/admin", icon: LayoutDashboard, label: "Inicio", end: true },
   { to: "/admin/ds160", icon: ClipboardList, label: "Solicitudes DS-160" },
+  { to: "/admin/categorias", icon: Tags, label: "Categorías" },
   { to: "/admin/servicios", icon: Briefcase, label: "Servicios" },
   { to: "/admin/personal", icon: Users, label: "Personal" },
   { to: "/admin/usuarios", icon: ShieldCheck, label: "Cuentas internas" },
-  { to: "/admin/videos", icon: Video, label: "Videos" },
+  { to: "/admin/redes-sociales", icon: Share2, label: "Redes sociales" },
   { to: "/admin/resenas", icon: Star, label: "Reseñas" },
 ];
 
