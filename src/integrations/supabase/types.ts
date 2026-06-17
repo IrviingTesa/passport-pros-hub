@@ -122,6 +122,51 @@ export type Database = {
         }
         Relationships: []
       }
+      ds160_resources: {
+        Row: {
+          created_at: string
+          description: string | null
+          file_name: string | null
+          id: string
+          is_active: boolean
+          mime_type: string | null
+          size_bytes: number | null
+          slug: string
+          storage_path: string | null
+          title: string
+          updated_at: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          file_name?: string | null
+          id?: string
+          is_active?: boolean
+          mime_type?: string | null
+          size_bytes?: number | null
+          slug: string
+          storage_path?: string | null
+          title: string
+          updated_at?: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          file_name?: string | null
+          id?: string
+          is_active?: boolean
+          mime_type?: string | null
+          size_bytes?: number | null
+          slug?: string
+          storage_path?: string | null
+          title?: string
+          updated_at?: string
+          uploaded_by?: string | null
+        }
+        Relationships: []
+      }
       page_visits: {
         Row: {
           city: string | null
@@ -251,9 +296,43 @@ export type Database = {
         }
         Relationships: []
       }
+      service_categories: {
+        Row: {
+          created_at: string
+          description: string | null
+          display_order: number
+          id: string
+          is_active: boolean
+          name: string
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          name: string
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          name?: string
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       services: {
         Row: {
           category: string
+          category_id: string | null
           created_at: string
           display_order: number
           id: string
@@ -264,6 +343,7 @@ export type Database = {
         }
         Insert: {
           category: string
+          category_id?: string | null
           created_at?: string
           display_order?: number
           id?: string
@@ -274,6 +354,7 @@ export type Database = {
         }
         Update: {
           category?: string
+          category_id?: string | null
           created_at?: string
           display_order?: number
           id?: string
@@ -281,6 +362,53 @@ export type Database = {
           name?: string
           short_description?: string | null
           updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "services_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "service_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      site_settings: {
+        Row: {
+          contact_email: string | null
+          created_at: string
+          facebook_url: string | null
+          id: string
+          instagram_url: string | null
+          phone_number: string | null
+          tiktok_url: string | null
+          updated_at: string
+          whatsapp_number: string | null
+          youtube_url: string | null
+        }
+        Insert: {
+          contact_email?: string | null
+          created_at?: string
+          facebook_url?: string | null
+          id?: string
+          instagram_url?: string | null
+          phone_number?: string | null
+          tiktok_url?: string | null
+          updated_at?: string
+          whatsapp_number?: string | null
+          youtube_url?: string | null
+        }
+        Update: {
+          contact_email?: string | null
+          created_at?: string
+          facebook_url?: string | null
+          id?: string
+          instagram_url?: string | null
+          phone_number?: string | null
+          tiktok_url?: string | null
+          updated_at?: string
+          whatsapp_number?: string | null
+          youtube_url?: string | null
         }
         Relationships: []
       }

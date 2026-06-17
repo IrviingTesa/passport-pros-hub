@@ -35,7 +35,12 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Plus, Trash2, Loader2, ShieldAlert, KeyRound } from "lucide-react";
+import { Plus, Trash2, Loader2, ShieldAlert, KeyRound, Copy } from "lucide-react";
+
+interface ResetResult {
+  email: string;
+  password: string;
+}
 
 interface InternalUser {
   id: string;
@@ -133,6 +138,25 @@ export default function UsersAdmin() {
     }
     toast.success("Cuenta eliminada");
     load();
+  };
+
+  const [resetResult, setResetResult] = useState<ResetResult | null>(null);
+
+  const resetPassword = async (user_id: string, email: string | null) => {
+    if (
+      !confirm(
+        `Se generará una contraseña temporal para ${email}. La contraseña anterior dejará de funcionar. ¿Continuar?`,
+      )
+    )
+      return;
+    const { data, error } = await supabase.functions.invoke("manage-users", {
+      body: { type: "reset_password", user_id },
+    });
+    if (error || data?.error) {
+      toast.error(error?.message ?? data?.error ?? "Error");
+      return;
+    }
+    setResetResult({ email: email ?? "—", password: data.password });
   };
 
   return (
@@ -315,6 +339,15 @@ export default function UsersAdmin() {
                         <Button
                           size="icon"
                           variant="ghost"
+                          title="Resetear contraseña"
+                          onClick={() => resetPassword(u.id, u.email)}
+                        >
+                          <KeyRound className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          title="Eliminar cuenta"
                           onClick={() => remove(u.id, u.email)}
                           disabled={isMe}
                         >
@@ -329,6 +362,42 @@ export default function UsersAdmin() {
           )}
         </CardContent>
       </Card>
+
+      <Dialog
+        open={!!resetResult}
+        onOpenChange={(o) => !o && setResetResult(null)}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Contraseña temporal generada</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <p className="text-sm text-muted-foreground">
+              Compártela con <strong>{resetResult?.email}</strong> de forma
+              segura. La contraseña anterior ya no funciona. Pídele cambiarla en
+              su primer acceso.
+            </p>
+            <div className="flex gap-2">
+              <Input readOnly value={resetResult?.password ?? ""} />
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => {
+                  if (resetResult?.password) {
+                    navigator.clipboard.writeText(resetResult.password);
+                    toast.success("Contraseña copiada");
+                  }
+                }}
+              >
+                <Copy className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button onClick={() => setResetResult(null)}>Listo</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
