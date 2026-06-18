@@ -2,7 +2,6 @@ import { NavLink, Outlet, Link } from "react-router-dom";
 import {
   LayoutDashboard,
   Briefcase,
-  Users,
   ShieldCheck,
   Share2,
   Star,
@@ -27,7 +26,6 @@ const navItemsAdmin = [
   { to: "/admin/ds160", icon: ClipboardList, label: "Solicitudes DS-160" },
   { to: "/admin/categorias", icon: Tags, label: "Categorías" },
   { to: "/admin/servicios", icon: Briefcase, label: "Servicios" },
-  { to: "/admin/personal", icon: Users, label: "Personal" },
   { to: "/admin/usuarios", icon: ShieldCheck, label: "Cuentas internas" },
   { to: "/admin/redes-sociales", icon: Share2, label: "Redes sociales" },
   { to: "/admin/resenas", icon: Star, label: "Reseñas" },
