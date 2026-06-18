@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -12,7 +12,6 @@ import AdminLayout from "./pages/admin/AdminLayout.tsx";
 import AdminDashboard from "./pages/admin/AdminDashboard.tsx";
 import ServicesAdmin from "./pages/admin/ServicesAdmin.tsx";
 import CategoriesAdmin from "./pages/admin/CategoriesAdmin.tsx";
-import UsersAdmin2 from "./pages/admin/UsersAdmin.tsx";
 import UsersAdmin from "./pages/admin/UsersAdmin.tsx";
 import SocialMediaAdmin from "./pages/admin/SocialMediaAdmin.tsx";
 import ReviewsAdmin from "./pages/admin/ReviewsAdmin.tsx";
