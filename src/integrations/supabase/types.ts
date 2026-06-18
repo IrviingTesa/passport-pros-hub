@@ -167,6 +167,33 @@ export type Database = {
         }
         Relationships: []
       }
+      internal_passwords: {
+        Row: {
+          is_stale: boolean
+          password: string
+          set_at: string
+          set_by: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          is_stale?: boolean
+          password: string
+          set_at?: string
+          set_by?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          is_stale?: boolean
+          password?: string
+          set_at?: string
+          set_by?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       page_visits: {
         Row: {
           city: string | null
@@ -191,6 +218,36 @@ export type Database = {
           ip_hash?: string | null
           region?: string | null
           visited_at?: string
+        }
+        Relationships: []
+      }
+      password_access_log: {
+        Row: {
+          action: string
+          admin_email: string | null
+          admin_id: string | null
+          created_at: string
+          id: string
+          target_email: string | null
+          target_user_id: string | null
+        }
+        Insert: {
+          action: string
+          admin_email?: string | null
+          admin_id?: string | null
+          created_at?: string
+          id?: string
+          target_email?: string | null
+          target_user_id?: string | null
+        }
+        Update: {
+          action?: string
+          admin_email?: string | null
+          admin_id?: string | null
+          created_at?: string
+          id?: string
+          target_email?: string | null
+          target_user_id?: string | null
         }
         Relationships: []
       }
@@ -424,6 +481,7 @@ export type Database = {
           photo_url: string | null
           position: string
           updated_at: string
+          user_id: string | null
           whatsapp_number: string | null
         }
         Insert: {
@@ -437,6 +495,7 @@ export type Database = {
           photo_url?: string | null
           position: string
           updated_at?: string
+          user_id?: string | null
           whatsapp_number?: string | null
         }
         Update: {
@@ -450,6 +509,7 @@ export type Database = {
           photo_url?: string | null
           position?: string
           updated_at?: string
+          user_id?: string | null
           whatsapp_number?: string | null
         }
         Relationships: []
