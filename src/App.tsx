@@ -42,7 +42,7 @@ const App = () => (
               <Route index element={<AdminDashboard />} />
               <Route path="categorias" element={<CategoriesAdmin />} />
               <Route path="servicios" element={<ServicesAdmin />} />
-              <Route path="personal" element={<StaffAdmin />} />
+              <Route path="personal" element={<Navigate to="/admin/usuarios" replace />} />
               <Route
                 path="usuarios"
                 element={
