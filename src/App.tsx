@@ -11,7 +11,7 @@ import DS160Form from "./pages/DS160Form.tsx";
 import AdminLayout from "./pages/admin/AdminLayout.tsx";
 import AdminDashboard from "./pages/admin/AdminDashboard.tsx";
 import ServicesAdmin from "./pages/admin/ServicesAdmin.tsx";
-import CategoriesAdmin from "./pages/admin/CategoriesAdmin.tsx";
+
 import UsersAdmin from "./pages/admin/UsersAdmin.tsx";
 import SocialMediaAdmin from "./pages/admin/SocialMediaAdmin.tsx";
 import ReviewsAdmin from "./pages/admin/ReviewsAdmin.tsx";
