@@ -1,72 +1,66 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { MessageCircle, FileText, Plane, Stamp } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
-import { SERVICE_CATEGORIES, whatsappLink } from "@/config/site";
+import { whatsappLink } from "@/config/site";
 
 interface ServiceRow {
   id: string;
   name: string;
-  category: string;
   short_description: string | null;
   display_order: number;
 }
 
-const CATEGORY_ICONS: Record<string, typeof FileText> = {
+interface CategoryRow {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  display_order: number;
+  is_active: boolean;
+  items: ServiceRow[];
+}
+
+const ICON_BY_SLUG: Record<string, typeof FileText> = {
   "pasaportes-visas": Plane,
   "actas-registros": FileText,
   "otros-servicios": Stamp,
 };
 
-const CATEGORY_META = SERVICE_CATEGORIES.reduce<
-  Record<string, { title: string; description: string }>
->((acc, c) => {
-  acc[c.id] = { title: c.title, description: c.description };
-  return acc;
-}, {});
-
 export const Services = () => {
-  const [services, setServices] = useState<ServiceRow[]>([]);
+  const [categories, setCategories] = useState<CategoryRow[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     (async () => {
-      const { data } = await supabase
-        .from("services")
-        .select("id, name, category, short_description, display_order")
-        .eq("is_active", true)
-        .order("display_order", { ascending: true });
-      setServices((data as ServiceRow[]) ?? []);
+      const [catRes, svcRes] = await Promise.all([
+        supabase
+          .from("service_categories" as never)
+          .select("id, name, slug, description, display_order, is_active")
+          .eq("is_active", true)
+          .order("display_order", { ascending: true }),
+        supabase
+          .from("services")
+          .select("id, name, category_id, short_description, display_order, is_active")
+          .eq("is_active", true)
+          .order("display_order", { ascending: true }),
+      ]);
+
+      const cats = ((catRes.data as unknown) as CategoryRow[]) ?? [];
+      const svcs =
+        ((svcRes.data as unknown) as (ServiceRow & { category_id: string | null })[]) ?? [];
+
+      setCategories(
+        cats.map((c) => ({
+          ...c,
+          items: svcs.filter((s) => s.category_id === c.id),
+        })),
+      );
       setLoading(false);
     })();
   }, []);
-
-  // Agrupa por categoría manteniendo el orden de SERVICE_CATEGORIES y agregando categorías nuevas al final
-  const grouped = useMemo(() => {
-    const byCat = new Map<string, ServiceRow[]>();
-    services.forEach((s) => {
-      const arr = byCat.get(s.category) ?? [];
-      arr.push(s);
-      byCat.set(s.category, arr);
-    });
-    const orderedKeys = [
-      ...SERVICE_CATEGORIES.map((c) => c.id).filter((id) => byCat.has(id)),
-      ...Array.from(byCat.keys()).filter(
-        (k) => !SERVICE_CATEGORIES.find((c) => c.id === k),
-      ),
-    ];
-    return orderedKeys.map((id) => ({
-      id,
-      title: CATEGORY_META[id]?.title ?? id,
-      description: CATEGORY_META[id]?.description ?? "",
-      items: byCat.get(id) ?? [],
-    }));
-  }, [services]);
-
-  // Fallback a configuración estática si la BD aún no tiene datos
-  const fallback = !loading && services.length === 0;
 
   return (
     <section id="servicios" className="section-padding bg-gradient-section">
@@ -90,24 +84,14 @@ export const Services = () => {
               <Skeleton key={i} className="h-96 rounded-lg" />
             ))}
           </div>
+        ) : categories.length === 0 ? (
+          <p className="text-center text-muted-foreground">
+            Próximamente publicaremos nuestros servicios.
+          </p>
         ) : (
           <div className="grid lg:grid-cols-3 gap-8">
-            {(fallback
-              ? SERVICE_CATEGORIES.map((c) => ({
-                  id: c.id,
-                  title: c.title,
-                  description: c.description,
-                  items: c.services.map((s) => ({
-                    id: s.id,
-                    name: s.name,
-                    category: c.id,
-                    short_description: null,
-                    display_order: 0,
-                  })),
-                }))
-              : grouped
-            ).map((category) => {
-              const Icon = CATEGORY_ICONS[category.id] ?? FileText;
+            {categories.map((category) => {
+              const Icon = ICON_BY_SLUG[category.slug] ?? FileText;
               return (
                 <Card
                   key={category.id}
@@ -118,7 +102,7 @@ export const Services = () => {
                       <Icon className="w-7 h-7 text-accent" />
                     </div>
                     <h3 className="font-serif text-2xl font-bold text-primary">
-                      {category.title}
+                      {category.name}
                     </h3>
                   </div>
 
@@ -153,7 +137,7 @@ export const Services = () => {
 
                   <Button asChild variant="default" className="w-full mt-auto">
                     <a
-                      href={whatsappLink(`Categoría: ${category.title}`)}
+                      href={whatsappLink(`Categoría: ${category.name}`)}
                       target="_blank"
                       rel="noopener noreferrer"
                     >
