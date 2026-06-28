@@ -20,6 +20,7 @@ interface PaymentRow {
   status: string;
   amount: number;
   addon_live_advisory: boolean;
+  mp_payment_id: string | null;
 }
 
 export function DS160Payment({ applicationId, editToken, onPaid }: Props) {
