@@ -15,6 +15,7 @@ import { DS160Step2 } from "@/components/ds160/DS160Step2";
 import { DS160Step3 } from "@/components/ds160/DS160Step3";
 import { DS160Step4 } from "@/components/ds160/DS160Step4";
 import { DS160Step5 } from "@/components/ds160/DS160Step5";
+import { DS160Payment } from "@/components/ds160/DS160Payment";
 import { SEO } from "@/components/SEO";
 import {
   step1Schema,
@@ -36,16 +37,17 @@ import {
 } from "@/lib/ds160-schema";
 
 const STORAGE_KEY = "ds160_draft";
-const TOTAL_STEPS = 5;
+const TOTAL_STEPS = 6;
 
-type StepNum = 1 | 2 | 3 | 4 | 5;
+type StepNum = 1 | 2 | 3 | 4 | 5 | 6;
 
 const STEP_LABELS: Record<StepNum, string> = {
   1: "Datos personales",
   2: "Contacto",
   3: "Trabajo",
   4: "Viajes",
-  5: "Contacto en EE.UU.",
+  5: "Contacto EE.UU.",
+  6: "Pago",
 };
 
 interface DraftRef {
@@ -131,7 +133,10 @@ export default function DS160Form() {
           step5Form.reset({ ...defaultStep5, ...fd });
           setDraftRef(ref);
           const s = (data.current_step as StepNum) ?? 1;
-          setStep(s >= 1 && s <= TOTAL_STEPS ? s : 1);
+          let initial: StepNum = s >= 1 && s <= TOTAL_STEPS ? s : 1;
+          // If user returns from Mercado Pago redirect, jump to payment step.
+          if (urlId && urlToken && initial === 5) initial = 6;
+          setStep(initial);
           if (data.status === "submitted" || data.status === "in_review" || data.status === "completed") {
             setSubmitted(true);
           }
@@ -160,13 +165,15 @@ export default function DS160Form() {
     const s1 = step1Form.getValues();
     const formData = collectFormData();
 
+    // DB trigger caps current_step at 5; payment step (6) is UI-only.
+    const dbStep = Math.min(nextStep, 5);
     const payload = {
       email: s1.email || "",
       full_name: `${s1.first_name || ""} ${s1.last_name || ""}`.trim(),
       purpose_of_trip: s1.purpose_of_trip || null,
       embassy: s1.embassy || null,
       form_data: formData as never,
-      current_step: nextStep,
+      current_step: dbStep,
       status: finalize ? "submitted" : "draft",
     };
 
@@ -224,6 +231,8 @@ export default function DS160Form() {
         return step4Form.trigger();
       case 5:
         return step5Form.trigger();
+      case 6:
+        return true;
     }
   };
 
@@ -362,12 +371,35 @@ export default function DS160Form() {
         return (
           <FormProvider {...step5Form}>
             <Form {...step5Form}>
-              <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }} className="space-y-6">
+              <form onSubmit={(e) => { e.preventDefault(); handleNext(); }} className="space-y-6">
                 <DS160Step5 />
-                <StepNav onPrev={handlePrev} loading={submitting} isLast={true} />
+                <StepNav onPrev={handlePrev} loading={savingDraft} isLast={false} nextLabel="Continuar al pago" />
               </form>
             </Form>
           </FormProvider>
+        );
+      case 6:
+        if (!draftRef) {
+          return (
+            <p className="text-sm text-center text-muted-foreground py-8">
+              Completa los pasos anteriores para continuar al pago.
+            </p>
+          );
+        }
+        return (
+          <div className="space-y-6">
+            <DS160Payment
+              applicationId={draftRef.id}
+              editToken={draftRef.edit_token}
+              onPaid={() => { if (!submitting && !submitted) handleSubmit(); }}
+            />
+            <div className="flex justify-between pt-4 border-t">
+              <Button type="button" variant="outline" onClick={handlePrev} disabled={submitting}>
+                <ArrowLeft className="w-4 h-4" /> Anterior
+              </Button>
+              <span />
+            </div>
+          </div>
         );
     }
   };
@@ -404,7 +436,7 @@ export default function DS160Form() {
 
         <div className="mb-6">
           <div className="flex justify-between text-xs sm:text-sm font-medium text-muted-foreground mb-2 gap-1">
-            {([1, 2, 3, 4, 5] as StepNum[]).map((n) => (
+            {([1, 2, 3, 4, 5, 6] as StepNum[]).map((n) => (
               <span
                 key={n}
                 className={`flex-1 text-center truncate ${
@@ -441,10 +473,12 @@ function StepNav({
   onPrev,
   loading,
   isLast,
+  nextLabel,
 }: {
   onPrev: (() => void) | null;
   loading: boolean;
   isLast: boolean;
+  nextLabel?: string;
 }) {
   return (
     <div className="flex justify-between pt-4 border-t">
@@ -459,7 +493,7 @@ function StepNav({
         {loading && <Loader2 className="w-4 h-4 animate-spin" />}
         {isLast ? "Enviar solicitud" : (
           <>
-            Siguiente <ArrowRight className="w-4 h-4" />
+            {nextLabel ?? "Siguiente"} <ArrowRight className="w-4 h-4" />
           </>
         )}
       </Button>
