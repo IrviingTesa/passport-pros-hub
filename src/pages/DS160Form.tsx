@@ -37,16 +37,17 @@ import {
 } from "@/lib/ds160-schema";
 
 const STORAGE_KEY = "ds160_draft";
-const TOTAL_STEPS = 5;
+const TOTAL_STEPS = 6;
 
-type StepNum = 1 | 2 | 3 | 4 | 5;
+type StepNum = 1 | 2 | 3 | 4 | 5 | 6;
 
 const STEP_LABELS: Record<StepNum, string> = {
   1: "Datos personales",
   2: "Contacto",
   3: "Trabajo",
   4: "Viajes",
-  5: "Contacto en EE.UU.",
+  5: "Contacto EE.UU.",
+  6: "Pago",
 };
 
 interface DraftRef {
