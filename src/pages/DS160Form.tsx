@@ -368,12 +368,35 @@ export default function DS160Form() {
         return (
           <FormProvider {...step5Form}>
             <Form {...step5Form}>
-              <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }} className="space-y-6">
+              <form onSubmit={(e) => { e.preventDefault(); handleNext(); }} className="space-y-6">
                 <DS160Step5 />
-                <StepNav onPrev={handlePrev} loading={submitting} isLast={true} />
+                <StepNav onPrev={handlePrev} loading={savingDraft} isLast={false} nextLabel="Continuar al pago" />
               </form>
             </Form>
           </FormProvider>
+        );
+      case 6:
+        if (!draftRef) {
+          return (
+            <p className="text-sm text-center text-muted-foreground py-8">
+              Completa los pasos anteriores para continuar al pago.
+            </p>
+          );
+        }
+        return (
+          <div className="space-y-6">
+            <DS160Payment
+              applicationId={draftRef.id}
+              editToken={draftRef.edit_token}
+              onPaid={() => { if (!submitting && !submitted) handleSubmit(); }}
+            />
+            <div className="flex justify-between pt-4 border-t">
+              <Button type="button" variant="outline" onClick={handlePrev} disabled={submitting}>
+                <ArrowLeft className="w-4 h-4" /> Anterior
+              </Button>
+              <span />
+            </div>
+          </div>
         );
     }
   };
