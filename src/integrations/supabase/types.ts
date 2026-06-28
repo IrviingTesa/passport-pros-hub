@@ -48,6 +48,7 @@ export type Database = {
           form_data: Json
           full_name: string
           id: string
+          payment_status: string
           purpose_of_trip: string | null
           status: string
           submitted_at: string | null
@@ -63,6 +64,7 @@ export type Database = {
           form_data?: Json
           full_name?: string
           id?: string
+          payment_status?: string
           purpose_of_trip?: string | null
           status?: string
           submitted_at?: string | null
@@ -78,6 +80,7 @@ export type Database = {
           form_data?: Json
           full_name?: string
           id?: string
+          payment_status?: string
           purpose_of_trip?: string | null
           status?: string
           submitted_at?: string | null
@@ -121,6 +124,62 @@ export type Database = {
           status?: string
         }
         Relationships: []
+      }
+      ds160_payments: {
+        Row: {
+          addon_live_advisory: boolean
+          amount: number
+          application_id: string
+          created_at: string
+          currency: string
+          id: string
+          mp_payment_id: string | null
+          mp_preference_id: string | null
+          paid_at: string | null
+          payer_email: string | null
+          raw_payload: Json | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          addon_live_advisory?: boolean
+          amount: number
+          application_id: string
+          created_at?: string
+          currency?: string
+          id?: string
+          mp_payment_id?: string | null
+          mp_preference_id?: string | null
+          paid_at?: string | null
+          payer_email?: string | null
+          raw_payload?: Json | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          addon_live_advisory?: boolean
+          amount?: number
+          application_id?: string
+          created_at?: string
+          currency?: string
+          id?: string
+          mp_payment_id?: string | null
+          mp_preference_id?: string | null
+          paid_at?: string | null
+          payer_email?: string | null
+          raw_payload?: Json | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ds160_payments_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "ds160_applications"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       ds160_resources: {
         Row: {
@@ -590,6 +649,7 @@ export type Database = {
           form_data: Json
           full_name: string
           id: string
+          payment_status: string
           purpose_of_trip: string | null
           status: string
           submitted_at: string | null
@@ -599,6 +659,59 @@ export type Database = {
         SetofOptions: {
           from: "*"
           to: "ds160_applications"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      create_ds160_payment_with_token: {
+        Args: {
+          _addon_live_advisory: boolean
+          _amount: number
+          _application_id: string
+          _edit_token: string
+        }
+        Returns: {
+          addon_live_advisory: boolean
+          amount: number
+          application_id: string
+          created_at: string
+          currency: string
+          id: string
+          mp_payment_id: string | null
+          mp_preference_id: string | null
+          paid_at: string | null
+          payer_email: string | null
+          raw_payload: Json | null
+          status: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "ds160_payments"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      get_ds160_payment_with_token: {
+        Args: { _application_id: string; _edit_token: string }
+        Returns: {
+          addon_live_advisory: boolean
+          amount: number
+          application_id: string
+          created_at: string
+          currency: string
+          id: string
+          mp_payment_id: string | null
+          mp_preference_id: string | null
+          paid_at: string | null
+          payer_email: string | null
+          raw_payload: Json | null
+          status: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "ds160_payments"
           isOneToOne: true
           isSetofReturn: false
         }
@@ -614,6 +727,7 @@ export type Database = {
           form_data: Json
           full_name: string
           id: string
+          payment_status: string
           purpose_of_trip: string | null
           status: string
           submitted_at: string | null
@@ -659,6 +773,7 @@ export type Database = {
           form_data: Json
           full_name: string
           id: string
+          payment_status: string
           purpose_of_trip: string | null
           status: string
           submitted_at: string | null
