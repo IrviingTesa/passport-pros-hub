@@ -228,6 +228,8 @@ export default function DS160Form() {
         return step4Form.trigger();
       case 5:
         return step5Form.trigger();
+      case 6:
+        return true;
     }
   };
 
