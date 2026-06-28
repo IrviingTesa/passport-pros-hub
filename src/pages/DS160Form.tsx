@@ -133,7 +133,10 @@ export default function DS160Form() {
           step5Form.reset({ ...defaultStep5, ...fd });
           setDraftRef(ref);
           const s = (data.current_step as StepNum) ?? 1;
-          setStep(s >= 1 && s <= TOTAL_STEPS ? s : 1);
+          let initial: StepNum = s >= 1 && s <= TOTAL_STEPS ? s : 1;
+          // If user returns from Mercado Pago redirect, jump to payment step.
+          if (urlId && urlToken && initial === 5) initial = 6;
+          setStep(initial);
           if (data.status === "submitted" || data.status === "in_review" || data.status === "completed") {
             setSubmitted(true);
           }
