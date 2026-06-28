@@ -15,6 +15,7 @@ import { DS160Step2 } from "@/components/ds160/DS160Step2";
 import { DS160Step3 } from "@/components/ds160/DS160Step3";
 import { DS160Step4 } from "@/components/ds160/DS160Step4";
 import { DS160Step5 } from "@/components/ds160/DS160Step5";
+import { DS160Payment } from "@/components/ds160/DS160Payment";
 import { SEO } from "@/components/SEO";
 import {
   step1Schema,
