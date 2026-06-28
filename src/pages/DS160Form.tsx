@@ -186,19 +186,22 @@ export default function DS160Form() {
         if (error) throw error;
         return data;
       } else {
-        const { data, error } = await supabase
-          .from("ds160_applications")
-          .insert({
-            ...payload,
-            user_id: user?.id ?? null,
-          })
-          .select("id, edit_token")
-          .single();
+        const { data, error } = await supabase.rpc("create_ds160_application", {
+          _email: payload.email,
+          _full_name: payload.full_name,
+          _purpose_of_trip: payload.purpose_of_trip,
+          _embassy: payload.embassy,
+          _form_data: payload.form_data,
+          _current_step: payload.current_step,
+          _status: payload.status,
+          _user_id: user?.id ?? null,
+        });
         if (error) throw error;
-        const ref = { id: data.id, edit_token: data.edit_token };
+        const row = data as { id: string; edit_token: string };
+        const ref = { id: row.id, edit_token: row.edit_token };
         setDraftRef(ref);
         if (!user) localStorage.setItem(STORAGE_KEY, JSON.stringify(ref));
-        return data;
+        return row;
       }
     } catch (err) {
       console.error("DS-160 save error:", err);
