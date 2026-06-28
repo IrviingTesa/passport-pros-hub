@@ -436,7 +436,7 @@ export default function DS160Form() {
 
         <div className="mb-6">
           <div className="flex justify-between text-xs sm:text-sm font-medium text-muted-foreground mb-2 gap-1">
-            {([1, 2, 3, 4, 5] as StepNum[]).map((n) => (
+            {([1, 2, 3, 4, 5, 6] as StepNum[]).map((n) => (
               <span
                 key={n}
                 className={`flex-1 text-center truncate ${
