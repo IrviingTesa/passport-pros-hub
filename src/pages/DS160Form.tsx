@@ -162,13 +162,15 @@ export default function DS160Form() {
     const s1 = step1Form.getValues();
     const formData = collectFormData();
 
+    // DB trigger caps current_step at 5; payment step (6) is UI-only.
+    const dbStep = Math.min(nextStep, 5);
     const payload = {
       email: s1.email || "",
       full_name: `${s1.first_name || ""} ${s1.last_name || ""}`.trim(),
       purpose_of_trip: s1.purpose_of_trip || null,
       embassy: s1.embassy || null,
       form_data: formData as never,
-      current_step: nextStep,
+      current_step: dbStep,
       status: finalize ? "submitted" : "draft",
     };
 
