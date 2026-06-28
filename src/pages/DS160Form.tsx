@@ -470,10 +470,12 @@ function StepNav({
   onPrev,
   loading,
   isLast,
+  nextLabel,
 }: {
   onPrev: (() => void) | null;
   loading: boolean;
   isLast: boolean;
+  nextLabel?: string;
 }) {
   return (
     <div className="flex justify-between pt-4 border-t">
@@ -488,7 +490,7 @@ function StepNav({
         {loading && <Loader2 className="w-4 h-4 animate-spin" />}
         {isLast ? "Enviar solicitud" : (
           <>
-            Siguiente <ArrowRight className="w-4 h-4" />
+            {nextLabel ?? "Siguiente"} <ArrowRight className="w-4 h-4" />
           </>
         )}
       </Button>
