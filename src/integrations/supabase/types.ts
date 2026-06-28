@@ -570,6 +570,39 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      create_ds160_application: {
+        Args: {
+          _current_step: number
+          _email: string
+          _embassy: string
+          _form_data: Json
+          _full_name: string
+          _purpose_of_trip: string
+          _status: string
+          _user_id: string
+        }
+        Returns: {
+          created_at: string
+          current_step: number
+          edit_token: string
+          email: string
+          embassy: string | null
+          form_data: Json
+          full_name: string
+          id: string
+          purpose_of_trip: string | null
+          status: string
+          submitted_at: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "ds160_applications"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       get_ds160_with_token: {
         Args: { _edit_token: string; _id: string }
         Returns: {
