@@ -1,10 +1,11 @@
 import { Link } from "react-router-dom";
 import { ClipboardList, ShieldCheck, Clock, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { whatsappLink } from "@/config/site";
+import { useSiteSettings } from "@/contexts/SiteSettingsContext";
 
 /** Sección DS-160 — CTA al wizard del pre-registro. */
 export const DS160Section = () => {
+  const { whatsappHref } = useSiteSettings();
   return (
     <section id="ds160" className="section-padding bg-gradient-navy text-primary-foreground relative overflow-hidden">
       <div className="absolute inset-0 opacity-10">

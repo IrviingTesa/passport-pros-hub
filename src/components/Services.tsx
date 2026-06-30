@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
-import { whatsappLink } from "@/config/site";
+import { useSiteSettings } from "@/contexts/SiteSettingsContext";
 
 interface ServiceRow {
   id: string;
@@ -32,6 +32,7 @@ const ICON_BY_SLUG: Record<string, typeof FileText> = {
 export const Services = () => {
   const [categories, setCategories] = useState<CategoryRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const { whatsappHref } = useSiteSettings();
 
   useEffect(() => {
     (async () => {
@@ -122,7 +123,7 @@ export const Services = () => {
                           {service.name}
                         </span>
                         <a
-                          href={whatsappLink(service.name)}
+                          href={whatsappHref(service.name)}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="flex items-center gap-1.5 text-xs font-semibold text-whatsapp hover:bg-whatsapp/10 px-2.5 py-1.5 rounded-md transition-colors flex-shrink-0"
@@ -137,7 +138,7 @@ export const Services = () => {
 
                   <Button asChild variant="default" className="w-full mt-auto">
                     <a
-                      href={whatsappLink(`Categoría: ${category.name}`)}
+                      href={whatsappHref(`Categoría: ${category.name}`)}
                       target="_blank"
                       rel="noopener noreferrer"
                     >

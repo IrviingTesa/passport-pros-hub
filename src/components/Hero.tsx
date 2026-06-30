@@ -1,9 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { ShieldCheck, Clock, Award } from "lucide-react";
 import heroImage from "@/assets/hero-passports.jpg";
-import { whatsappLink } from "@/config/site";
+import { useSiteSettings } from "@/contexts/SiteSettingsContext";
 
 export const Hero = () => {
+  const { whatsappHref } = useSiteSettings();
   return (
     <section
       id="inicio"
@@ -44,7 +45,7 @@ export const Hero = () => {
 
           <div className="flex flex-col sm:flex-row gap-4 mb-12">
             <Button asChild variant="gold" size="lg">
-              <a href={whatsappLink()} target="_blank" rel="noopener noreferrer">
+              <a href={whatsappHref()} target="_blank" rel="noopener noreferrer">
                 Solicitar asesoría gratuita
               </a>
             </Button>

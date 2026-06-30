@@ -1,8 +1,11 @@
+import { Link } from "react-router-dom";
 import { Facebook, Instagram, Youtube, Music2 } from "lucide-react";
 import logo from "@/assets/logo-emblem.png";
 import { SITE_CONFIG, SERVICE_CATEGORIES } from "@/config/site";
+import { useSiteSettings } from "@/contexts/SiteSettingsContext";
 
 export const Footer = () => {
+  const { settings } = useSiteSettings();
   return (
     <footer className="bg-gradient-navy text-primary-foreground">
       <div className="container-narrow py-16">
@@ -10,32 +13,26 @@ export const Footer = () => {
           {/* Brand */}
           <div className="lg:col-span-1">
             <div className="flex items-center gap-3 mb-4">
-              <img
-                src={logo}
-                alt={SITE_CONFIG.brandName}
-                width={48}
-                height={48}
-                loading="lazy"
-                className="h-12 w-12 object-contain"
-              />
-              <div className="font-serif font-bold text-lg leading-tight">
-                {SITE_CONFIG.brandName}
-              </div>
+              <img src={logo} alt={SITE_CONFIG.brandName} width={48} height={48} loading="lazy" className="h-12 w-12 object-contain" />
+              <div className="font-serif font-bold text-lg leading-tight">{SITE_CONFIG.brandName}</div>
             </div>
             <p className="text-primary-foreground/70 text-sm leading-relaxed mb-4">
-              Tus asesores migratorios de confianza para trámites legales y
-              migratorios en México.
+              Tus asesores migratorios de confianza para trámites legales y migratorios en México.
             </p>
+            <ul className="text-primary-foreground/70 text-sm space-y-1 mb-4">
+              <li>📞 {settings.phone_number}</li>
+              <li>✉️ {settings.contact_email}</li>
+            </ul>
             <div className="flex gap-3">
               {[
-                { icon: Facebook, href: SITE_CONFIG.socials.facebook, label: "Facebook" },
-                { icon: Instagram, href: SITE_CONFIG.socials.instagram, label: "Instagram" },
-                { icon: Music2, href: SITE_CONFIG.socials.tiktok, label: "TikTok" },
-                { icon: Youtube, href: SITE_CONFIG.socials.youtube, label: "YouTube" },
+                { icon: Facebook, href: settings.facebook_url, label: "Facebook" },
+                { icon: Instagram, href: settings.instagram_url, label: "Instagram" },
+                { icon: Music2, href: settings.tiktok_url, label: "TikTok" },
+                { icon: Youtube, href: settings.youtube_url, label: "YouTube" },
               ].map(({ icon: Icon, href, label }) => (
                 <a
                   key={label}
-                  href={href}
+                  href={href || "#"}
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label={label}
@@ -50,16 +47,11 @@ export const Footer = () => {
           {/* Services */}
           {SERVICE_CATEGORIES.map((cat) => (
             <div key={cat.id}>
-              <h4 className="font-serif font-bold text-accent mb-4">
-                {cat.title}
-              </h4>
+              <h4 className="font-serif font-bold text-accent mb-4">{cat.title}</h4>
               <ul className="space-y-2 text-sm">
                 {cat.services.slice(0, 5).map((s) => (
                   <li key={s.id}>
-                    <a
-                      href="#servicios"
-                      className="text-primary-foreground/70 hover:text-accent transition-colors"
-                    >
+                    <a href="/#servicios" className="text-primary-foreground/70 hover:text-accent transition-colors">
                       {s.short || s.name}
                     </a>
                   </li>
@@ -71,16 +63,15 @@ export const Footer = () => {
 
         <div className="pt-8 border-t border-primary-foreground/10 flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-primary-foreground/60">
           <div>
-            © {new Date().getFullYear()} {SITE_CONFIG.brandName}. Todos los
-            derechos reservados.
+            © {new Date().getFullYear()} {SITE_CONFIG.brandName}. Todos los derechos reservados.
           </div>
-          <div className="flex gap-6">
-            <a href="#" className="hover:text-accent transition-colors">
+          <div className="flex flex-wrap gap-6 justify-center">
+            <Link to="/aviso-de-privacidad" className="hover:text-accent transition-colors">
               Aviso de Privacidad
-            </a>
-            <a href="#" className="hover:text-accent transition-colors">
-              Términos
-            </a>
+            </Link>
+            <Link to="/terminos-y-condiciones" className="hover:text-accent transition-colors">
+              Términos y Condiciones
+            </Link>
           </div>
         </div>
       </div>
