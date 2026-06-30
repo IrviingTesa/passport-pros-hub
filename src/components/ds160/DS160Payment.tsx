@@ -15,6 +15,8 @@ interface Props {
   onPaid: () => void;
 }
 
+import { Link } from "react-router-dom";
+
 interface PaymentRow {
   id: string;
   status: string;
@@ -25,6 +27,7 @@ interface PaymentRow {
 
 export function DS160Payment({ applicationId, editToken, onPaid }: Props) {
   const [addon, setAddon] = useState(false);
+  const [accepted, setAccepted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [checking, setChecking] = useState(true);
   const [payment, setPayment] = useState<PaymentRow | null>(null);
@@ -122,6 +125,17 @@ export function DS160Payment({ applicationId, editToken, onPaid }: Props) {
         </p>
       </div>
 
+      <Card className="border-accent/30 bg-accent/5">
+        <CardContent className="pt-6">
+          <p className="text-sm leading-relaxed text-foreground">
+            El servicio DS-160 tiene un costo de <strong>$600 MXN</strong>. Incluye llenado del formulario,
+            orientación documental, acceso a preguntas posibles y creación de cita cuando aplique. No incluye pago
+            oficial de cita, derechos gubernamentales, transporte, hospedaje ni otros gastos externos. Entiendo que
+            la aprobación de visa depende exclusivamente de la autoridad correspondiente.
+          </p>
+        </CardContent>
+      </Card>
+
       <Card>
         <CardContent className="pt-6 space-y-4">
           <div className="flex items-center justify-between text-sm">
@@ -133,21 +147,46 @@ export function DS160Payment({ applicationId, editToken, onPaid }: Props) {
             <Checkbox checked={addon} onCheckedChange={(v) => setAddon(!!v)} className="mt-0.5" />
             <div className="flex-1 text-sm">
               <div className="flex justify-between items-center gap-2">
-                <strong className="text-primary">Asesoría en vivo</strong>
+                <strong className="text-primary">Asesoría en vivo de preguntas posibles</strong>
                 <span className="font-semibold">+${ADDON_PRICE} MXN</span>
               </div>
               <p className="text-xs text-muted-foreground mt-1">
-                Sesión 1-a-1 con un asesor migratorio para repasar tus respuestas y entrevista consular.
+                Agregar asesoría en vivo de preguntas posibles por $200 MXN adicionales. Esta asesoría incluye
+                orientación sobre cómo responder, qué errores evitar y cómo prepararse mejor para la entrevista. No
+                garantiza aprobación de visa.
               </p>
             </div>
           </label>
 
           <div className="flex justify-between items-center pt-3 border-t">
-            <span className="font-semibold text-primary">Total a pagar</span>
+            <span className="font-semibold text-primary">Total a pagar {addon ? "(con asesoría)" : "(sin asesoría)"}</span>
             <span className="text-2xl font-bold text-accent">${total} MXN</span>
           </div>
 
-          <Button onClick={handlePay} disabled={loading} className="w-full" variant="gold" size="lg">
+          <label className="flex items-start gap-3 p-3 rounded-lg border cursor-pointer hover:bg-secondary/40 transition">
+            <Checkbox checked={accepted} onCheckedChange={(v) => setAccepted(!!v)} className="mt-0.5" />
+            <span className="text-xs text-muted-foreground leading-relaxed">
+              He leído y acepto el{" "}
+              <Link to="/aviso-de-privacidad" target="_blank" className="underline text-primary">Aviso de Privacidad</Link>{" "}
+              y los{" "}
+              <Link to="/terminos-y-condiciones" target="_blank" className="underline text-primary">Términos y Condiciones</Link>.{" "}
+              Autorizo el uso de mis datos personales para revisar, integrar y dar seguimiento al servicio solicitado.
+            </span>
+          </label>
+
+          <Button
+            onClick={() => {
+              if (!accepted) {
+                toast.error("Debes aceptar el Aviso de Privacidad y los Términos y Condiciones para continuar.");
+                return;
+              }
+              handlePay();
+            }}
+            disabled={loading || !accepted}
+            className="w-full"
+            variant="gold"
+            size="lg"
+          >
             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <CreditCard className="w-4 h-4" />}
             Pagar con Mercado Pago
           </Button>

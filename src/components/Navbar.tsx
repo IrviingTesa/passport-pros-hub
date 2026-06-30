@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { Menu, X } from "lucide-react";
 import logo from "@/assets/logo-emblem.png";
-import { SITE_CONFIG, whatsappLink } from "@/config/site";
+import { SITE_CONFIG } from "@/config/site";
+import { useSiteSettings } from "@/contexts/SiteSettingsContext";
 import { Button } from "@/components/ui/button";
 
 const NAV_LINKS = [
@@ -15,6 +16,7 @@ const NAV_LINKS = [
 export const Navbar = () => {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const { whatsappHref } = useSiteSettings();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
