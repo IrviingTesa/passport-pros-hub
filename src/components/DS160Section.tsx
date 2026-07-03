@@ -55,7 +55,7 @@ export const DS160Section = () => {
               <Link to="/ds160">Iniciar pre-registro</Link>
             </Button>
             <Button asChild variant="outlineLight" size="lg">
-              <a href={whatsappLink("Pre-registro DS-160 - Visa Americana")} target="_blank" rel="noopener noreferrer">
+              <a href={whatsappHref("Pre-registro DS-160 - Visa Americana")} target="_blank" rel="noopener noreferrer">
                 Consultar por WhatsApp
               </a>
             </Button>
