@@ -75,7 +75,7 @@ export const Navbar = () => {
 
         <div className="hidden lg:block">
           <Button asChild variant="gold" size="sm">
-            <a href={whatsappLink()} target="_blank" rel="noopener noreferrer">
+            <a href={whatsappHref()} target="_blank" rel="noopener noreferrer">
               WhatsApp
             </a>
           </Button>
@@ -106,7 +106,7 @@ export const Navbar = () => {
               </a>
             ))}
             <Button asChild variant="gold" className="mt-2">
-              <a href={whatsappLink()} target="_blank" rel="noopener noreferrer">
+              <a href={whatsappHref()} target="_blank" rel="noopener noreferrer">
                 Contactar por WhatsApp
               </a>
             </Button>
