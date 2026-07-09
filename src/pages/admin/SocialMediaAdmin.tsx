@@ -24,6 +24,7 @@ import {
   Upload,
   Download,
   Trash2,
+  RefreshCw,
 } from "lucide-react";
 
 interface VideoChannelsRow {
@@ -31,6 +32,8 @@ interface VideoChannelsRow {
   youtube_channel_id: string | null;
   youtube_channel_url: string | null;
   tiktok_profile_url: string | null;
+  last_synced_at?: string | null;
+  last_sync_error?: string | null;
 }
 
 interface SiteSettings {
@@ -62,13 +65,16 @@ export default function SocialMediaAdmin() {
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const [syncing, setSyncing] = useState(false);
 
   const load = async () => {
     setLoading(true);
     const [ch, st, rs] = await Promise.all([
       supabase
         .from("video_channels")
-        .select("id, youtube_channel_id, youtube_channel_url, tiktok_profile_url")
+        .select(
+          "id, youtube_channel_id, youtube_channel_url, tiktok_profile_url, last_synced_at, last_sync_error",
+        )
         .limit(1)
         .maybeSingle(),
       supabase
@@ -196,6 +202,21 @@ export default function SocialMediaAdmin() {
     toast.success("PDF eliminado");
     load();
   };
+
+  const syncYouTubeNow = async () => {
+    setSyncing(true);
+    const { data, error } = await supabase.functions.invoke("youtube-videos", {
+      body: { sync: true },
+    });
+    setSyncing(false);
+    if (error) return toast.error(error.message);
+    const d = data as { syncedCount?: number; syncError?: string | null };
+    if (d?.syncError) toast.error(`YouTube: ${d.syncError}`);
+    else toast.success(`Videos actualizados (${d?.syncedCount ?? 0})`);
+    load();
+  };
+
+
 
   if (loading || !channels || !settings) {
     return (
@@ -328,8 +349,48 @@ export default function SocialMediaAdmin() {
               placeholder="https://tiktok.com/@miPerfil"
             />
           </div>
+
+          <div className="border-t pt-3 space-y-2">
+            <div className="text-sm">
+              <div className="font-medium">Sincronización de videos</div>
+              <div className="text-muted-foreground text-xs">
+                Los videos del canal se refrescan automáticamente cada semana.
+                {channels.last_synced_at ? (
+                  <>
+                    {" "}Última actualización:{" "}
+                    <b>
+                      {new Date(channels.last_synced_at).toLocaleString("es-MX")}
+                    </b>
+                    .
+                  </>
+                ) : (
+                  <> Aún no se ha sincronizado.</>
+                )}
+                {channels.last_sync_error && (
+                  <div className="text-destructive mt-1">
+                    Último error: {channels.last_sync_error}
+                  </div>
+                )}
+              </div>
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={syncYouTubeNow}
+              disabled={syncing}
+            >
+              {syncing ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <RefreshCw className="w-4 h-4" />
+              )}
+              Actualizar videos ahora
+            </Button>
+          </div>
         </CardContent>
       </Card>
+
 
       <Card>
         <CardHeader>
