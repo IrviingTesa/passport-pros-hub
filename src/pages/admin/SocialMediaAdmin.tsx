@@ -24,6 +24,7 @@ import {
   Upload,
   Download,
   Trash2,
+  RefreshCw,
 } from "lucide-react";
 
 interface VideoChannelsRow {
