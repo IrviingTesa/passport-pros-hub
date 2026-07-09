@@ -349,8 +349,48 @@ export default function SocialMediaAdmin() {
               placeholder="https://tiktok.com/@miPerfil"
             />
           </div>
+
+          <div className="border-t pt-3 space-y-2">
+            <div className="text-sm">
+              <div className="font-medium">Sincronización de videos</div>
+              <div className="text-muted-foreground text-xs">
+                Los videos del canal se refrescan automáticamente cada semana.
+                {channels.last_synced_at ? (
+                  <>
+                    {" "}Última actualización:{" "}
+                    <b>
+                      {new Date(channels.last_synced_at).toLocaleString("es-MX")}
+                    </b>
+                    .
+                  </>
+                ) : (
+                  <> Aún no se ha sincronizado.</>
+                )}
+                {channels.last_sync_error && (
+                  <div className="text-destructive mt-1">
+                    Último error: {channels.last_sync_error}
+                  </div>
+                )}
+              </div>
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={syncYouTubeNow}
+              disabled={syncing}
+            >
+              {syncing ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <RefreshCw className="w-4 h-4" />
+              )}
+              Actualizar videos ahora
+            </Button>
+          </div>
         </CardContent>
       </Card>
+
 
       <Card>
         <CardHeader>
