@@ -65,6 +65,7 @@ export default function SocialMediaAdmin() {
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const [syncing, setSyncing] = useState(false);
 
   const load = async () => {
     setLoading(true);
