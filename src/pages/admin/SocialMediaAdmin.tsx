@@ -203,6 +203,21 @@ export default function SocialMediaAdmin() {
     load();
   };
 
+  const syncYouTubeNow = async () => {
+    setSyncing(true);
+    const { data, error } = await supabase.functions.invoke("youtube-videos", {
+      body: { sync: true },
+    });
+    setSyncing(false);
+    if (error) return toast.error(error.message);
+    const d = data as { syncedCount?: number; syncError?: string | null };
+    if (d?.syncError) toast.error(`YouTube: ${d.syncError}`);
+    else toast.success(`Videos actualizados (${d?.syncedCount ?? 0})`);
+    load();
+  };
+
+
+
   if (loading || !channels || !settings) {
     return (
       <div className="py-20 text-center">
