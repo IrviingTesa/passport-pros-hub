@@ -598,6 +598,8 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          last_sync_error: string | null
+          last_synced_at: string | null
           tiktok_profile_url: string | null
           tiktok_video_urls: Json
           updated_at: string
@@ -607,6 +609,8 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: string
+          last_sync_error?: string | null
+          last_synced_at?: string | null
           tiktok_profile_url?: string | null
           tiktok_video_urls?: Json
           updated_at?: string
@@ -616,11 +620,52 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
+          last_sync_error?: string | null
+          last_synced_at?: string | null
           tiktok_profile_url?: string | null
           tiktok_video_urls?: Json
           updated_at?: string
           youtube_channel_id?: string | null
           youtube_channel_url?: string | null
+        }
+        Relationships: []
+      }
+      youtube_videos_cache: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          published_at: string
+          synced_at: string
+          thumbnail_url: string
+          title: string
+          updated_at: string
+          video_id: string
+          youtube_url: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          published_at: string
+          synced_at?: string
+          thumbnail_url: string
+          title: string
+          updated_at?: string
+          video_id: string
+          youtube_url: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          published_at?: string
+          synced_at?: string
+          thumbnail_url?: string
+          title?: string
+          updated_at?: string
+          video_id?: string
+          youtube_url?: string
         }
         Relationships: []
       }
