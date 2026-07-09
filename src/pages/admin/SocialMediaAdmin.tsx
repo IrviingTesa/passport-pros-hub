@@ -72,7 +72,9 @@ export default function SocialMediaAdmin() {
     const [ch, st, rs] = await Promise.all([
       supabase
         .from("video_channels")
-        .select("id, youtube_channel_id, youtube_channel_url, tiktok_profile_url")
+        .select(
+          "id, youtube_channel_id, youtube_channel_url, tiktok_profile_url, last_synced_at, last_sync_error",
+        )
         .limit(1)
         .maybeSingle(),
       supabase
