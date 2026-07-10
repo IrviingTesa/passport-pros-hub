@@ -53,7 +53,7 @@ export function useLegalContacts() {
       email: settings.contact_email,
       phone: settings.phone_number,
       whatsapp: settings.phone_number || settings.whatsapp_number,
-      legalName: "[NOMBRE LEGAL O RAZÓN SOCIAL]",
+      legalName: "Bernardo Balanzar",
       address: "[DOMICILIO COMPLETO O DOMICILIO DE ATENCIÓN]",
     }),
     [settings],
