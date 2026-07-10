@@ -9,7 +9,7 @@ export const SITE_CONFIG = {
   whatsappNumber: "525555555555",
   email: "asesoresmigratorios@gmail.com",
   phone: "+52 555 555 5555",
-  address: "Isaac Newton, Centro, 40900 Técpan de Galeana, Gro.",
+  address: "Tecpán de Galeana, Guerrero, México",
   hours: "Lun – Vie: 9:00 – 18:00 · Sáb: 9:00 – 14:00",
   socials: {
     facebook: "#",

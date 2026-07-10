@@ -53,8 +53,8 @@ export function useLegalContacts() {
       email: settings.contact_email,
       phone: settings.phone_number,
       whatsapp: settings.phone_number || settings.whatsapp_number,
-      legalName: "Lic.Bernardo Balanzar",
-      address: "Isaac Newton, Centro, 40900 Técpan de Galeana, Gro.",
+      legalName: "[NOMBRE LEGAL O RAZÓN SOCIAL]",
+      address: "[DOMICILIO COMPLETO O DOMICILIO DE ATENCIÓN]",
     }),
     [settings],
   );
