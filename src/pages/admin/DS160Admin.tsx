@@ -179,9 +179,15 @@ export default function DS160Admin() {
       <Tabs value={tab} onValueChange={setTab}>
         <TabsList className="flex-wrap h-auto">
           {STATUS_TABS.map((t) => {
-            const count = items.filter((i) => i.status === t.value).length;
+            const count =
+              t.value === "trash"
+                ? items.filter((i) => i.deleted_at !== null).length
+                : items.filter(
+                    (i) => i.deleted_at === null && i.status === t.value,
+                  ).length;
             return (
               <TabsTrigger key={t.value} value={t.value} className="gap-2">
+                {t.value === "trash" && <Trash2 className="w-3.5 h-3.5" />}
                 {t.label}
                 {count > 0 && (
                   <Badge variant="secondary" className="h-5 px-1.5 text-xs">
