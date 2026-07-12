@@ -132,6 +132,23 @@ export default function SocialMediaAdmin() {
     toast.success("Cambios guardados");
   };
 
+  const syncNow = async () => {
+    setSyncing(true);
+    const { data, error } = await supabase.functions.invoke<{
+      ok: boolean;
+      synced?: number;
+      error?: string;
+    }>("youtube-sync", { body: {} });
+    setSyncing(false);
+    if (error || !data?.ok) {
+      toast.error(data?.error ?? error?.message ?? "Error al sincronizar");
+    } else {
+      toast.success(`Videos actualizados (${data.synced ?? 0})`);
+    }
+    load();
+  };
+
+
   const handleUpload = async (file: File) => {
     if (!resource) return;
     if (file.type !== "application/pdf") {
