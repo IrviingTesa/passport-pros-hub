@@ -64,6 +64,7 @@ export default function SocialMediaAdmin() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [syncing, setSyncing] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const load = async () => {
@@ -71,7 +72,9 @@ export default function SocialMediaAdmin() {
     const [ch, st, rs] = await Promise.all([
       supabase
         .from("video_channels")
-        .select("id, youtube_channel_id, youtube_channel_url, tiktok_profile_url")
+        .select(
+          "id, youtube_channel_id, youtube_channel_url, tiktok_profile_url, last_synced_at, last_sync_error",
+        )
         .limit(1)
         .maybeSingle(),
       supabase
