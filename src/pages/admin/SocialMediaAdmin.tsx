@@ -351,8 +351,41 @@ export default function SocialMediaAdmin() {
               placeholder="https://tiktok.com/@miPerfil"
             />
           </div>
+
+          <div className="rounded-md border p-3 bg-muted/30 space-y-2">
+            <div className="text-sm">
+              <span className="font-medium">Última sincronización: </span>
+              {channels.last_synced_at
+                ? new Date(channels.last_synced_at).toLocaleString("es-MX")
+                : "nunca"}
+            </div>
+            {channels.last_sync_error && (
+              <div className="text-xs text-destructive">
+                Último error: {channels.last_sync_error}
+              </div>
+            )}
+            <p className="text-xs text-muted-foreground">
+              La sincronización automática corre 1 vez por semana. Usa este
+              botón si acabas de subir un video y quieres verlo ahora.
+            </p>
+            <Button
+              type="button"
+              size="sm"
+              variant="secondary"
+              onClick={syncNow}
+              disabled={syncing}
+            >
+              {syncing ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <RefreshCw className="w-4 h-4" />
+              )}
+              Actualizar videos ahora
+            </Button>
+          </div>
         </CardContent>
       </Card>
+
 
       <Card>
         <CardHeader>
