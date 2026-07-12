@@ -458,6 +458,55 @@ export default function DS160Admin() {
           )}
         </DialogContent>
       </Dialog>
+
+      <AlertDialog
+        open={!!confirmSoftDelete}
+        onOpenChange={(o) => !o && setConfirmSoftDelete(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Enviar a papelera</AlertDialogTitle>
+            <AlertDialogDescription>
+              La solicitud de <strong>{confirmSoftDelete?.full_name}</strong> se
+              moverá a la papelera. Podrás restaurarla o eliminarla
+              definitivamente después.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => confirmSoftDelete && softDelete(confirmSoftDelete)}
+            >
+              Enviar a papelera
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog
+        open={!!confirmHardDelete}
+        onOpenChange={(o) => !o && setConfirmHardDelete(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Eliminar definitivamente</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta acción no se puede deshacer. La solicitud de{" "}
+              <strong>{confirmHardDelete?.full_name}</strong> se borrará
+              permanentemente de la base de datos.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => confirmHardDelete && hardDelete(confirmHardDelete)}
+            >
+              Eliminar definitivamente
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
