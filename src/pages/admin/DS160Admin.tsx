@@ -10,6 +10,16 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -18,7 +28,19 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { Loader2, Eye, Mail, Phone, MapPin, User, Calendar, Lock } from "lucide-react";
+import {
+  Loader2,
+  Eye,
+  Mail,
+  Phone,
+  MapPin,
+  User,
+  Calendar,
+  Lock,
+  Trash2,
+  RotateCcw,
+  Trash,
+} from "lucide-react";
 import { STATUS_LABELS } from "@/lib/ds160-options";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
@@ -37,6 +59,8 @@ interface Application {
   updated_at: string;
   form_data: Record<string, unknown>;
   user_id: string | null;
+  deleted_at: string | null;
+  previous_status: string | null;
 }
 
 const STATUS_TABS = [
@@ -45,6 +69,7 @@ const STATUS_TABS = [
   { value: "completed", label: "Completadas" },
   { value: "rejected", label: "Rechazadas" },
   { value: "draft", label: "Borradores" },
+  { value: "trash", label: "Papelera" },
 ];
 
 export default function DS160Admin() {
@@ -57,6 +82,8 @@ export default function DS160Admin() {
   const [tab, setTab] = useState("submitted");
   const [selected, setSelected] = useState<Application | null>(null);
   const [updating, setUpdating] = useState(false);
+  const [confirmSoftDelete, setConfirmSoftDelete] = useState<Application | null>(null);
+  const [confirmHardDelete, setConfirmHardDelete] = useState<Application | null>(null);
 
   const load = async () => {
     setLoading(true);
@@ -68,7 +95,7 @@ export default function DS160Admin() {
       toast.error("Error al cargar solicitudes");
       setItems([]);
     } else {
-      setItems((data ?? []) as Application[]);
+      setItems((data ?? []) as unknown as Application[]);
     }
     setLoading(false);
   };
@@ -77,7 +104,9 @@ export default function DS160Admin() {
     load();
   }, []);
 
-  const filtered = items.filter((i) => i.status === tab);
+  const filtered = items.filter((i) =>
+    tab === "trash" ? i.deleted_at !== null : i.deleted_at === null && i.status === tab,
+  );
 
   const updateStatus = async (id: string, newStatus: string) => {
     setUpdating(true);
@@ -94,6 +123,36 @@ export default function DS160Admin() {
     setSelected((s) => (s ? { ...s, status: newStatus } : s));
     load();
   };
+
+  const softDelete = async (app: Application) => {
+    setUpdating(true);
+    const { error } = await supabase.rpc("soft_delete_ds160", { _id: app.id });
+    setUpdating(false);
+    setConfirmSoftDelete(null);
+    if (error) return toast.error(error.message);
+    toast.success("Solicitud enviada a papelera");
+    load();
+  };
+
+  const restore = async (app: Application) => {
+    setUpdating(true);
+    const { error } = await supabase.rpc("restore_ds160", { _id: app.id });
+    setUpdating(false);
+    if (error) return toast.error(error.message);
+    toast.success("Solicitud restaurada");
+    load();
+  };
+
+  const hardDelete = async (app: Application) => {
+    setUpdating(true);
+    const { error } = await supabase.rpc("hard_delete_ds160", { _id: app.id });
+    setUpdating(false);
+    setConfirmHardDelete(null);
+    if (error) return toast.error(error.message);
+    toast.success("Solicitud eliminada definitivamente");
+    load();
+  };
+
 
   return (
     <div className="space-y-6">
