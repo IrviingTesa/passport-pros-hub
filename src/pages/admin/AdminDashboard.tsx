@@ -56,10 +56,12 @@ export default function AdminDashboard() {
       supabase
         .from("ds160_applications")
         .select("*", { count: "exact", head: true })
-        .eq("status", "submitted"),
+        .eq("status", "submitted")
+        .is("deleted_at", null),
       supabase
         .from("ds160_applications")
-        .select("*", { count: "exact", head: true }),
+        .select("*", { count: "exact", head: true })
+        .is("deleted_at", null),
       supabase
         .from("page_visits")
         .select("*", { count: "exact", head: true })

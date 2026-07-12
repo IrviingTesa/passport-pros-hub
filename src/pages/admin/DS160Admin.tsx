@@ -10,6 +10,16 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -18,7 +28,19 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { Loader2, Eye, Mail, Phone, MapPin, User, Calendar, Lock } from "lucide-react";
+import {
+  Loader2,
+  Eye,
+  Mail,
+  Phone,
+  MapPin,
+  User,
+  Calendar,
+  Lock,
+  Trash2,
+  RotateCcw,
+  Trash,
+} from "lucide-react";
 import { STATUS_LABELS } from "@/lib/ds160-options";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
@@ -37,6 +59,8 @@ interface Application {
   updated_at: string;
   form_data: Record<string, unknown>;
   user_id: string | null;
+  deleted_at: string | null;
+  previous_status: string | null;
 }
 
 const STATUS_TABS = [
@@ -45,6 +69,7 @@ const STATUS_TABS = [
   { value: "completed", label: "Completadas" },
   { value: "rejected", label: "Rechazadas" },
   { value: "draft", label: "Borradores" },
+  { value: "trash", label: "Papelera" },
 ];
 
 export default function DS160Admin() {
@@ -57,6 +82,8 @@ export default function DS160Admin() {
   const [tab, setTab] = useState("submitted");
   const [selected, setSelected] = useState<Application | null>(null);
   const [updating, setUpdating] = useState(false);
+  const [confirmSoftDelete, setConfirmSoftDelete] = useState<Application | null>(null);
+  const [confirmHardDelete, setConfirmHardDelete] = useState<Application | null>(null);
 
   const load = async () => {
     setLoading(true);
@@ -68,7 +95,7 @@ export default function DS160Admin() {
       toast.error("Error al cargar solicitudes");
       setItems([]);
     } else {
-      setItems((data ?? []) as Application[]);
+      setItems((data ?? []) as unknown as Application[]);
     }
     setLoading(false);
   };
@@ -77,7 +104,9 @@ export default function DS160Admin() {
     load();
   }, []);
 
-  const filtered = items.filter((i) => i.status === tab);
+  const filtered = items.filter((i) =>
+    tab === "trash" ? i.deleted_at !== null : i.deleted_at === null && i.status === tab,
+  );
 
   const updateStatus = async (id: string, newStatus: string) => {
     setUpdating(true);
@@ -94,6 +123,36 @@ export default function DS160Admin() {
     setSelected((s) => (s ? { ...s, status: newStatus } : s));
     load();
   };
+
+  const softDelete = async (app: Application) => {
+    setUpdating(true);
+    const { error } = await supabase.rpc("soft_delete_ds160", { _id: app.id });
+    setUpdating(false);
+    setConfirmSoftDelete(null);
+    if (error) return toast.error(error.message);
+    toast.success("Solicitud enviada a papelera");
+    load();
+  };
+
+  const restore = async (app: Application) => {
+    setUpdating(true);
+    const { error } = await supabase.rpc("restore_ds160", { _id: app.id });
+    setUpdating(false);
+    if (error) return toast.error(error.message);
+    toast.success("Solicitud restaurada");
+    load();
+  };
+
+  const hardDelete = async (app: Application) => {
+    setUpdating(true);
+    const { error } = await supabase.rpc("hard_delete_ds160", { _id: app.id });
+    setUpdating(false);
+    setConfirmHardDelete(null);
+    if (error) return toast.error(error.message);
+    toast.success("Solicitud eliminada definitivamente");
+    load();
+  };
+
 
   return (
     <div className="space-y-6">
@@ -120,9 +179,15 @@ export default function DS160Admin() {
       <Tabs value={tab} onValueChange={setTab}>
         <TabsList className="flex-wrap h-auto">
           {STATUS_TABS.map((t) => {
-            const count = items.filter((i) => i.status === t.value).length;
+            const count =
+              t.value === "trash"
+                ? items.filter((i) => i.deleted_at !== null).length
+                : items.filter(
+                    (i) => i.deleted_at === null && i.status === t.value,
+                  ).length;
             return (
               <TabsTrigger key={t.value} value={t.value} className="gap-2">
+                {t.value === "trash" && <Trash2 className="w-3.5 h-3.5" />}
                 {t.label}
                 {count > 0 && (
                   <Badge variant="secondary" className="h-5 px-1.5 text-xs">
@@ -183,25 +248,63 @@ export default function DS160Admin() {
                             </div>
                           </div>
                         </div>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => {
-                            setSelected(app);
-                            if (user) {
-                              supabase
-                                .from("ds160_access_log")
-                                .insert({
-                                  user_id: user.id,
-                                  ds160_id: app.id,
-                                  ds160_full_name: app.full_name,
-                                })
-                                .then(() => {});
-                            }
-                          }}
-                        >
-                          <Eye className="w-4 h-4" /> Ver detalle
-                        </Button>
+                        <div className="flex flex-col gap-1.5 items-end">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              setSelected(app);
+                              if (user) {
+                                supabase
+                                  .from("ds160_access_log")
+                                  .insert({
+                                    user_id: user.id,
+                                    ds160_id: app.id,
+                                    ds160_full_name: app.full_name,
+                                  })
+                                  .then(() => {});
+                              }
+                            }}
+                          >
+                            <Eye className="w-4 h-4" /> Ver detalle
+                          </Button>
+                          {tab === "trash" ? (
+                            <>
+                              {canEdit && (
+                                <Button
+                                  size="sm"
+                                  variant="secondary"
+                                  onClick={() => restore(app)}
+                                  disabled={updating}
+                                >
+                                  <RotateCcw className="w-4 h-4" /> Restaurar
+                                </Button>
+                              )}
+                              {isAdmin && (
+                                <Button
+                                  size="sm"
+                                  variant="destructive"
+                                  onClick={() => setConfirmHardDelete(app)}
+                                  disabled={updating}
+                                >
+                                  <Trash className="w-4 h-4" /> Eliminar
+                                </Button>
+                              )}
+                            </>
+                          ) : (
+                            canEdit && (
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => setConfirmSoftDelete(app)}
+                                disabled={updating}
+                                className="text-destructive hover:text-destructive"
+                              >
+                                <Trash2 className="w-4 h-4" /> A papelera
+                              </Button>
+                            )
+                          )}
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
@@ -355,6 +458,55 @@ export default function DS160Admin() {
           )}
         </DialogContent>
       </Dialog>
+
+      <AlertDialog
+        open={!!confirmSoftDelete}
+        onOpenChange={(o) => !o && setConfirmSoftDelete(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Enviar a papelera</AlertDialogTitle>
+            <AlertDialogDescription>
+              La solicitud de <strong>{confirmSoftDelete?.full_name}</strong> se
+              moverá a la papelera. Podrás restaurarla o eliminarla
+              definitivamente después.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => confirmSoftDelete && softDelete(confirmSoftDelete)}
+            >
+              Enviar a papelera
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog
+        open={!!confirmHardDelete}
+        onOpenChange={(o) => !o && setConfirmHardDelete(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Eliminar definitivamente</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta acción no se puede deshacer. La solicitud de{" "}
+              <strong>{confirmHardDelete?.full_name}</strong> se borrará
+              permanentemente de la base de datos.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => confirmHardDelete && hardDelete(confirmHardDelete)}
+            >
+              Eliminar definitivamente
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
