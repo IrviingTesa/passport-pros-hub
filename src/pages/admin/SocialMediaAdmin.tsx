@@ -32,6 +32,8 @@ interface VideoChannelsRow {
   youtube_channel_id: string | null;
   youtube_channel_url: string | null;
   tiktok_profile_url: string | null;
+  last_synced_at?: string | null;
+  last_sync_error?: string | null;
 }
 
 interface SiteSettings {
