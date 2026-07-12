@@ -248,25 +248,63 @@ export default function DS160Admin() {
                             </div>
                           </div>
                         </div>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => {
-                            setSelected(app);
-                            if (user) {
-                              supabase
-                                .from("ds160_access_log")
-                                .insert({
-                                  user_id: user.id,
-                                  ds160_id: app.id,
-                                  ds160_full_name: app.full_name,
-                                })
-                                .then(() => {});
-                            }
-                          }}
-                        >
-                          <Eye className="w-4 h-4" /> Ver detalle
-                        </Button>
+                        <div className="flex flex-col gap-1.5 items-end">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              setSelected(app);
+                              if (user) {
+                                supabase
+                                  .from("ds160_access_log")
+                                  .insert({
+                                    user_id: user.id,
+                                    ds160_id: app.id,
+                                    ds160_full_name: app.full_name,
+                                  })
+                                  .then(() => {});
+                              }
+                            }}
+                          >
+                            <Eye className="w-4 h-4" /> Ver detalle
+                          </Button>
+                          {tab === "trash" ? (
+                            <>
+                              {canEdit && (
+                                <Button
+                                  size="sm"
+                                  variant="secondary"
+                                  onClick={() => restore(app)}
+                                  disabled={updating}
+                                >
+                                  <RotateCcw className="w-4 h-4" /> Restaurar
+                                </Button>
+                              )}
+                              {isAdmin && (
+                                <Button
+                                  size="sm"
+                                  variant="destructive"
+                                  onClick={() => setConfirmHardDelete(app)}
+                                  disabled={updating}
+                                >
+                                  <Trash className="w-4 h-4" /> Eliminar
+                                </Button>
+                              )}
+                            </>
+                          ) : (
+                            canEdit && (
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => setConfirmSoftDelete(app)}
+                                disabled={updating}
+                                className="text-destructive hover:text-destructive"
+                              >
+                                <Trash2 className="w-4 h-4" /> A papelera
+                              </Button>
+                            )
+                          )}
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
