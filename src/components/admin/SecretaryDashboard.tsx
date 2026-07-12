@@ -86,11 +86,15 @@ export default function SecretaryDashboard() {
     if (!user) return;
     setLoading(true);
     const [ds, dsP, rev, accThisMonth, accRecent, reqs] = await Promise.all([
-      supabase.from("ds160_applications").select("*", { count: "exact", head: true }),
       supabase
         .from("ds160_applications")
         .select("*", { count: "exact", head: true })
-        .eq("status", "submitted"),
+        .is("deleted_at", null),
+      supabase
+        .from("ds160_applications")
+        .select("*", { count: "exact", head: true })
+        .eq("status", "submitted")
+        .is("deleted_at", null),
       supabase
         .from("reviews")
         .select("*", { count: "exact", head: true })
