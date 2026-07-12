@@ -42,6 +42,8 @@ export type Database = {
         Row: {
           created_at: string
           current_step: number
+          deleted_at: string | null
+          deleted_by: string | null
           edit_token: string
           email: string
           embassy: string | null
@@ -49,6 +51,7 @@ export type Database = {
           full_name: string
           id: string
           payment_status: string
+          previous_status: string | null
           purpose_of_trip: string | null
           status: string
           submitted_at: string | null
@@ -58,6 +61,8 @@ export type Database = {
         Insert: {
           created_at?: string
           current_step?: number
+          deleted_at?: string | null
+          deleted_by?: string | null
           edit_token?: string
           email: string
           embassy?: string | null
@@ -65,6 +70,7 @@ export type Database = {
           full_name?: string
           id?: string
           payment_status?: string
+          previous_status?: string | null
           purpose_of_trip?: string | null
           status?: string
           submitted_at?: string | null
@@ -74,6 +80,8 @@ export type Database = {
         Update: {
           created_at?: string
           current_step?: number
+          deleted_at?: string | null
+          deleted_by?: string | null
           edit_token?: string
           email?: string
           embassy?: string | null
@@ -81,6 +89,7 @@ export type Database = {
           full_name?: string
           id?: string
           payment_status?: string
+          previous_status?: string | null
           purpose_of_trip?: string | null
           status?: string
           submitted_at?: string | null
@@ -688,6 +697,8 @@ export type Database = {
         Returns: {
           created_at: string
           current_step: number
+          deleted_at: string | null
+          deleted_by: string | null
           edit_token: string
           email: string
           embassy: string | null
@@ -695,6 +706,7 @@ export type Database = {
           full_name: string
           id: string
           payment_status: string
+          previous_status: string | null
           purpose_of_trip: string | null
           status: string
           submitted_at: string | null
@@ -766,6 +778,8 @@ export type Database = {
         Returns: {
           created_at: string
           current_step: number
+          deleted_at: string | null
+          deleted_by: string | null
           edit_token: string
           email: string
           embassy: string | null
@@ -773,6 +787,7 @@ export type Database = {
           full_name: string
           id: string
           payment_status: string
+          previous_status: string | null
           purpose_of_trip: string | null
           status: string
           submitted_at: string | null
@@ -786,6 +801,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      hard_delete_ds160: { Args: { _id: string }; Returns: undefined }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -793,9 +809,65 @@ export type Database = {
         }
         Returns: boolean
       }
+      restore_ds160: {
+        Args: { _id: string }
+        Returns: {
+          created_at: string
+          current_step: number
+          deleted_at: string | null
+          deleted_by: string | null
+          edit_token: string
+          email: string
+          embassy: string | null
+          form_data: Json
+          full_name: string
+          id: string
+          payment_status: string
+          previous_status: string | null
+          purpose_of_trip: string | null
+          status: string
+          submitted_at: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "ds160_applications"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       secretary_has_active_edit_permission: {
         Args: { _user_id: string }
         Returns: boolean
+      }
+      soft_delete_ds160: {
+        Args: { _id: string }
+        Returns: {
+          created_at: string
+          current_step: number
+          deleted_at: string | null
+          deleted_by: string | null
+          edit_token: string
+          email: string
+          embassy: string | null
+          form_data: Json
+          full_name: string
+          id: string
+          payment_status: string
+          previous_status: string | null
+          purpose_of_trip: string | null
+          status: string
+          submitted_at: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "ds160_applications"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       update_ds160_with_token: {
         Args: {
@@ -812,6 +884,8 @@ export type Database = {
         Returns: {
           created_at: string
           current_step: number
+          deleted_at: string | null
+          deleted_by: string | null
           edit_token: string
           email: string
           embassy: string | null
@@ -819,6 +893,7 @@ export type Database = {
           full_name: string
           id: string
           payment_status: string
+          previous_status: string | null
           purpose_of_trip: string | null
           status: string
           submitted_at: string | null
