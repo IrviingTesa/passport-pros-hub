@@ -548,9 +548,11 @@ export default function DS160Admin() {
           <AlertDialogHeader>
             <AlertDialogTitle>Eliminar definitivamente</AlertDialogTitle>
             <AlertDialogDescription>
-              Esta acción no se puede deshacer. La solicitud de{" "}
-              <strong>{confirmHardDelete?.full_name}</strong> se borrará
-              permanentemente de la base de datos.
+              Esta acción eliminará el formulario permanentemente y no se podrá recuperar.
+              <br />
+              <span className="text-xs italic">
+                Solicitud de <strong>{confirmHardDelete?.full_name}</strong>.
+              </span>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
