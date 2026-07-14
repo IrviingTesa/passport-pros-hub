@@ -60,6 +60,7 @@ interface Application {
   form_data: Record<string, unknown>;
   user_id: string | null;
   deleted_at: string | null;
+  deleted_by: string | null;
   previous_status: string | null;
 }
 
@@ -84,6 +85,7 @@ export default function DS160Admin() {
   const [updating, setUpdating] = useState(false);
   const [confirmSoftDelete, setConfirmSoftDelete] = useState<Application | null>(null);
   const [confirmHardDelete, setConfirmHardDelete] = useState<Application | null>(null);
+  const [deleterNames, setDeleterNames] = useState<Record<string, string>>({});
 
   const load = async () => {
     setLoading(true);
@@ -95,7 +97,24 @@ export default function DS160Admin() {
       toast.error("Error al cargar solicitudes");
       setItems([]);
     } else {
-      setItems((data ?? []) as unknown as Application[]);
+      const rows = (data ?? []) as unknown as Application[];
+      setItems(rows);
+      const deleterIds = Array.from(
+        new Set(rows.map((r) => r.deleted_by).filter((v): v is string => !!v)),
+      );
+      if (deleterIds.length > 0) {
+        const { data: profs } = await supabase
+          .from("profiles")
+          .select("id, full_name, email")
+          .in("id", deleterIds);
+        const map: Record<string, string> = {};
+        (profs ?? []).forEach((p) => {
+          map[p.id] = p.full_name || p.email || p.id.slice(0, 8);
+        });
+        setDeleterNames(map);
+      } else {
+        setDeleterNames({});
+      }
     }
     setLoading(false);
   };
@@ -251,6 +270,37 @@ export default function DS160Admin() {
                               Folio: <strong>{app.id.slice(0, 8).toUpperCase()}</strong> ·{" "}
                               {new Date(app.created_at).toLocaleString("es-MX")}
                             </div>
+                            {tab === "trash" && app.deleted_at && (
+                              <div className="mt-2 rounded bg-destructive/5 border border-destructive/20 px-2 py-1.5 text-xs space-y-0.5">
+                                <div>
+                                  🗑️ Eliminado el{" "}
+                                  <strong>
+                                    {new Date(app.deleted_at).toLocaleString("es-MX")}
+                                  </strong>
+                                  {app.deleted_by && (
+                                    <>
+                                      {" "}por{" "}
+                                      <strong>
+                                        {deleterNames[app.deleted_by] ??
+                                          app.deleted_by.slice(0, 8)}
+                                      </strong>
+                                    </>
+                                  )}
+                                </div>
+                                <div className="text-muted-foreground">
+                                  {trashCountdown(app.deleted_at)}
+                                </div>
+                                {app.previous_status && (
+                                  <div className="text-muted-foreground">
+                                    Estado previo:{" "}
+                                    <strong>
+                                      {STATUS_LABELS[app.previous_status]?.label ??
+                                        app.previous_status}
+                                    </strong>
+                                  </div>
+                                )}
+                              </div>
+                            )}
                           </div>
                         </div>
                         <div className="flex flex-col gap-1.5 items-end">
@@ -472,9 +522,11 @@ export default function DS160Admin() {
           <AlertDialogHeader>
             <AlertDialogTitle>Enviar a papelera</AlertDialogTitle>
             <AlertDialogDescription>
-              La solicitud de <strong>{confirmSoftDelete?.full_name}</strong> se
-              moverá a la papelera. Podrás restaurarla o eliminarla
-              definitivamente después.
+              Este formulario se moverá a Papelera. Podrás restaurarlo durante 6 meses antes de su eliminación definitiva.
+              <br />
+              <span className="text-xs italic">
+                Solicitud de <strong>{confirmSoftDelete?.full_name}</strong>.
+              </span>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -496,9 +548,11 @@ export default function DS160Admin() {
           <AlertDialogHeader>
             <AlertDialogTitle>Eliminar definitivamente</AlertDialogTitle>
             <AlertDialogDescription>
-              Esta acción no se puede deshacer. La solicitud de{" "}
-              <strong>{confirmHardDelete?.full_name}</strong> se borrará
-              permanentemente de la base de datos.
+              Esta acción eliminará el formulario permanentemente y no se podrá recuperar.
+              <br />
+              <span className="text-xs italic">
+                Solicitud de <strong>{confirmHardDelete?.full_name}</strong>.
+              </span>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -514,6 +568,20 @@ export default function DS160Admin() {
       </AlertDialog>
     </div>
   );
+}
+
+function trashCountdown(deletedAt: string): string {
+  const deleted = new Date(deletedAt).getTime();
+  const purgeAt = deleted + 1000 * 60 * 60 * 24 * 30 * 6; // ~6 meses
+  const now = Date.now();
+  const msLeft = purgeAt - now;
+  if (msLeft <= 0) return "Pendiente de eliminación definitiva.";
+  const days = Math.floor(msLeft / (1000 * 60 * 60 * 24));
+  if (days >= 30) {
+    const months = Math.floor(days / 30);
+    return `Eliminación automática en ~${months} ${months === 1 ? "mes" : "meses"} (${days} días).`;
+  }
+  return `Eliminación automática en ${days} ${days === 1 ? "día" : "días"}.`;
 }
 
 function fd(app: Application, key: string): string | null {
