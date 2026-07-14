@@ -201,6 +201,11 @@ export default function DS160Admin() {
 
         {STATUS_TABS.map((t) => (
           <TabsContent key={t.value} value={t.value} className="mt-4">
+            {t.value === "trash" && (
+              <div className="mb-3 rounded-md border border-accent/40 bg-accent/5 px-3 py-2 text-xs text-muted-foreground">
+                Las solicitudes en la papelera se eliminan definitivamente de forma automática después de 6 meses.
+              </div>
+            )}
             {loading ? (
               <div className="flex justify-center py-12">
                 <Loader2 className="w-8 h-8 animate-spin text-primary" />
