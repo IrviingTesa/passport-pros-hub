@@ -60,6 +60,7 @@ interface Application {
   form_data: Record<string, unknown>;
   user_id: string | null;
   deleted_at: string | null;
+  deleted_by: string | null;
   previous_status: string | null;
 }
 
