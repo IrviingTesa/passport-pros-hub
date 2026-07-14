@@ -85,6 +85,7 @@ export default function DS160Admin() {
   const [updating, setUpdating] = useState(false);
   const [confirmSoftDelete, setConfirmSoftDelete] = useState<Application | null>(null);
   const [confirmHardDelete, setConfirmHardDelete] = useState<Application | null>(null);
+  const [deleterNames, setDeleterNames] = useState<Record<string, string>>({});
 
   const load = async () => {
     setLoading(true);
@@ -96,7 +97,24 @@ export default function DS160Admin() {
       toast.error("Error al cargar solicitudes");
       setItems([]);
     } else {
-      setItems((data ?? []) as unknown as Application[]);
+      const rows = (data ?? []) as unknown as Application[];
+      setItems(rows);
+      const deleterIds = Array.from(
+        new Set(rows.map((r) => r.deleted_by).filter((v): v is string => !!v)),
+      );
+      if (deleterIds.length > 0) {
+        const { data: profs } = await supabase
+          .from("profiles")
+          .select("id, full_name, email")
+          .in("id", deleterIds);
+        const map: Record<string, string> = {};
+        (profs ?? []).forEach((p) => {
+          map[p.id] = p.full_name || p.email || p.id.slice(0, 8);
+        });
+        setDeleterNames(map);
+      } else {
+        setDeleterNames({});
+      }
     }
     setLoading(false);
   };
