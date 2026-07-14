@@ -566,6 +566,20 @@ export default function DS160Admin() {
   );
 }
 
+function trashCountdown(deletedAt: string): string {
+  const deleted = new Date(deletedAt).getTime();
+  const purgeAt = deleted + 1000 * 60 * 60 * 24 * 30 * 6; // ~6 meses
+  const now = Date.now();
+  const msLeft = purgeAt - now;
+  if (msLeft <= 0) return "Pendiente de eliminación definitiva.";
+  const days = Math.floor(msLeft / (1000 * 60 * 60 * 24));
+  if (days >= 30) {
+    const months = Math.floor(days / 30);
+    return `Eliminación automática en ~${months} ${months === 1 ? "mes" : "meses"} (${days} días).`;
+  }
+  return `Eliminación automática en ${days} ${days === 1 ? "día" : "días"}.`;
+}
+
 function fd(app: Application, key: string): string | null {
   const v = app.form_data?.[key];
   if (v == null || v === "") return null;
