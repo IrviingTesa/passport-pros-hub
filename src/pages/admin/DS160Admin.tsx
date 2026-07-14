@@ -270,6 +270,37 @@ export default function DS160Admin() {
                               Folio: <strong>{app.id.slice(0, 8).toUpperCase()}</strong> ·{" "}
                               {new Date(app.created_at).toLocaleString("es-MX")}
                             </div>
+                            {tab === "trash" && app.deleted_at && (
+                              <div className="mt-2 rounded bg-destructive/5 border border-destructive/20 px-2 py-1.5 text-xs space-y-0.5">
+                                <div>
+                                  🗑️ Eliminado el{" "}
+                                  <strong>
+                                    {new Date(app.deleted_at).toLocaleString("es-MX")}
+                                  </strong>
+                                  {app.deleted_by && (
+                                    <>
+                                      {" "}por{" "}
+                                      <strong>
+                                        {deleterNames[app.deleted_by] ??
+                                          app.deleted_by.slice(0, 8)}
+                                      </strong>
+                                    </>
+                                  )}
+                                </div>
+                                <div className="text-muted-foreground">
+                                  {trashCountdown(app.deleted_at)}
+                                </div>
+                                {app.previous_status && (
+                                  <div className="text-muted-foreground">
+                                    Estado previo:{" "}
+                                    <strong>
+                                      {STATUS_LABELS[app.previous_status]?.label ??
+                                        app.previous_status}
+                                    </strong>
+                                  </div>
+                                )}
+                              </div>
+                            )}
                           </div>
                         </div>
                         <div className="flex flex-col gap-1.5 items-end">
