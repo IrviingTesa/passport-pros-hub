@@ -522,9 +522,11 @@ export default function DS160Admin() {
           <AlertDialogHeader>
             <AlertDialogTitle>Enviar a papelera</AlertDialogTitle>
             <AlertDialogDescription>
-              La solicitud de <strong>{confirmSoftDelete?.full_name}</strong> se
-              moverá a la papelera. Podrás restaurarla o eliminarla
-              definitivamente después.
+              Este formulario se moverá a Papelera. Podrás restaurarlo durante 6 meses antes de su eliminación definitiva.
+              <br />
+              <span className="text-xs italic">
+                Solicitud de <strong>{confirmSoftDelete?.full_name}</strong>.
+              </span>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
