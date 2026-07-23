@@ -20,6 +20,7 @@ import SocialMediaAdmin from "./pages/admin/SocialMediaAdmin.tsx";
 import ReviewsAdmin from "./pages/admin/ReviewsAdmin.tsx";
 import DS160Admin from "./pages/admin/DS160Admin.tsx";
 import NotFound from "./pages/NotFound.tsx";
+import OAuthConsent from "./pages/OAuthConsent.tsx";
 
 const queryClient = new QueryClient();
 
@@ -37,6 +38,7 @@ const App = () => (
             {/* <Route path="/ds160" element={<DS160Form />} /> */}
             <Route path="/terminos-y-condiciones" element={<TerminosCondiciones />} />
             <Route path="/aviso-de-privacidad" element={<AvisoPrivacidad />} />
+            <Route path="/.lovable/oauth/consent" element={<OAuthConsent />} />
             <Route
               path="/admin"
               element={
