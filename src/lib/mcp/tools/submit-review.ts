@@ -35,7 +35,6 @@ export default defineTool({
         rating,
         comment,
         status: "pending",
-        user_id: ctx.getUserId(),
       })
       .select()
       .maybeSingle();
