@@ -1,0 +1,123 @@
+{
+  "version": 1,
+  "sdk_version": "0.24.0",
+  "path": "/functions/v1/mcp",
+  "auth": {
+    "type": "oauth",
+    "issuer": "https://fngefvyaqllxpsqopplt.supabase.co/auth/v1",
+    "accepted_audiences": [
+      "authenticated"
+    ]
+  },
+  "mcp": {
+    "server": {
+      "name": "asesores-migratorios-mcp",
+      "version": "0.1.0",
+      "title": "Asesores Migratorios"
+    },
+    "tools": [
+      {
+        "name": "list_services",
+        "title": "Listar servicios",
+        "description": "Lista el catálogo público de servicios y categorías activas de Asesores Migratorios.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "category_slug": {
+              "type": "string",
+              "description": "Filtrar por slug de categoría (opcional)."
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_my_ds160_applications",
+        "title": "Mis solicitudes DS-160",
+        "description": "Lista las solicitudes DS-160 del usuario autenticado (respeta permisos y RLS).",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {}
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "get_ds160_application",
+        "title": "Ver solicitud DS-160",
+        "description": "Devuelve una solicitud DS-160 por id. Sujeta a RLS: solo el dueño, secretaría con permiso activo o admin pueden verla.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "format": "uuid",
+              "description": "UUID de la solicitud DS-160."
+            }
+          },
+          "required": [
+            "id"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "submit_review",
+        "title": "Enviar reseña",
+        "description": "Envía una reseña del cliente para su aprobación por un administrador. Requiere sesión.",
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "client_name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            },
+            "rating": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 5
+            },
+            "comment": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1000
+            }
+          },
+          "required": [
+            "client_name",
+            "rating",
+            "comment"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}
