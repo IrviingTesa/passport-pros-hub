@@ -42,9 +42,9 @@ export default function Auth() {
   // Si ya está logueado, redirigir
   useEffect(() => {
     if (!authLoading && user) {
-      navigate("/admin", { replace: true });
+      navigate(nextPath, { replace: true });
     }
-  }, [user, authLoading, navigate]);
+  }, [user, authLoading, navigate, nextPath]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -69,7 +69,7 @@ export default function Auth() {
       return;
     }
     toast.success("Bienvenido");
-    navigate("/admin", { replace: true });
+    navigate(nextPath, { replace: true });
   };
 
   const handleSignup = async (e: React.FormEvent) => {
@@ -86,7 +86,7 @@ export default function Auth() {
       email: emailRes.data,
       password: passRes.data,
       options: {
-        emailRedirectTo: `${window.location.origin}/admin`,
+        emailRedirectTo: `${window.location.origin}${nextPath}`,
         data: { full_name: nameRes.data },
       },
     });
@@ -101,20 +101,21 @@ export default function Auth() {
       return;
     }
     toast.success("Cuenta creada. Pide al administrador que te asigne un rol.");
-    navigate("/admin", { replace: true });
+    navigate(nextPath, { replace: true });
   };
 
   const handleGoogle = async () => {
     setBusy(true);
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: `${window.location.origin}/admin` },
+      options: { redirectTo: `${window.location.origin}${nextPath}` },
     });
     if (error) {
       toast.error(error.message);
       setBusy(false);
     }
   };
+
 
   return (
     <div className="min-h-screen bg-gradient-navy flex items-center justify-center p-4">
