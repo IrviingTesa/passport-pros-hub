@@ -10,9 +10,8 @@ interface SEOProps {
   noindex?: boolean;
 }
 
-const SITE_URL =
-  typeof window !== "undefined" ? window.location.origin : "https://asesoresmigratorios.mx";
-const DEFAULT_IMAGE = `${SITE_URL}/og-image.jpg`;
+const SITE_URL = "https://asesoresmigratoriosmx.com";
+const DEFAULT_IMAGE = `${SITE_URL}/logovisas.png`;
 
 export const SEO = ({
   title,
