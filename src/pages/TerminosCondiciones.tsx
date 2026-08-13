@@ -8,7 +8,7 @@ export default function TerminosCondiciones() {
   return (
     <LegalLayout
       title="Términos y Condiciones"
-      lastUpdated="[FECHA]"
+      lastUpdated="30 de junio de 2026"
       description="Términos y Condiciones de Asesores Migratorios: alcance del servicio, pagos, obligaciones, reembolsos y limitación de responsabilidad."
       canonical="/terminos-y-condiciones"
     >
