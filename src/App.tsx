@@ -8,7 +8,7 @@ import { SiteSettingsProvider } from "@/contexts/SiteSettingsContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Index from "./pages/Index.tsx";
 import Auth from "./pages/Auth.tsx";
-//import DS160Form from "./pages/DS160Form.tsx";
+import DS160Form from "./pages/DS160Form.tsx";
 import TerminosCondiciones from "./pages/TerminosCondiciones.tsx";
 import AvisoPrivacidad from "./pages/AvisoPrivacidad.tsx";
 import AdminLayout from "./pages/admin/AdminLayout.tsx";
@@ -35,7 +35,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
-            {/* <Route path="/ds160" element={<DS160Form />} /> */}
+            <Route path="/ds160" element={<DS160Form />} />
             <Route path="/terminos-y-condiciones" element={<TerminosCondiciones />} />
             <Route path="/aviso-de-privacidad" element={<AvisoPrivacidad />} />
             <Route path="/.lovable/oauth/consent" element={<OAuthConsent />} />
