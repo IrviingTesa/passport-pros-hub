@@ -85,14 +85,14 @@ export const Footer = () => {
           </div>
 
           {/* Services */}
-          {SERVICE_CATEGORIES.map((cat) => (
+          {categories.map((cat) => (
             <div key={cat.id}>
-              <h4 className="font-serif font-bold text-accent mb-4">{cat.title}</h4>
+              <h4 className="font-serif font-bold text-accent mb-4">{cat.name}</h4>
               <ul className="space-y-2 text-sm">
-                {cat.services.slice(0, 5).map((s) => (
+                {cat.items.slice(0, 5).map((s) => (
                   <li key={s.id}>
                     <a href="/#servicios" className="text-primary-foreground/70 hover:text-accent transition-colors">
-                      {s.short || s.name}
+                      {s.short_description || s.name}
                     </a>
                   </li>
                 ))}
