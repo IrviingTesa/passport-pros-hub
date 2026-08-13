@@ -8,7 +8,7 @@ export default function AvisoPrivacidad() {
   return (
     <LegalLayout
       title="Aviso de Privacidad"
-      lastUpdated="[FECHA]"
+      lastUpdated="30 de junio de 2026"
       description="Aviso de Privacidad de Asesores Migratorios: datos personales que recabamos, finalidades, transferencias, derechos ARCO y medidas de seguridad."
       canonical="/aviso-de-privacidad"
     >

@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useSiteSettings } from "@/contexts/SiteSettingsContext";
 
 /** Control temporal para suspender/reactivar el pre-registro DS-160. */
-const PREREGISTRO_SUSPENDIDO = true;
+const PREREGISTRO_SUSPENDIDO = false;
 
 /** Sección DS-160 — CTA al wizard del pre-registro. */
 export const DS160Section = () => {

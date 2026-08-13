@@ -53,8 +53,8 @@ export function useLegalContacts() {
       email: settings.contact_email,
       phone: settings.phone_number,
       whatsapp: settings.phone_number || settings.whatsapp_number,
-      legalName: "[NOMBRE LEGAL O RAZÓN SOCIAL]",
-      address: "[DOMICILIO COMPLETO O DOMICILIO DE ATENCIÓN]",
+      legalName: "Lic. Juan Bernardo Balanzar Jacobo",
+      address: "Isaac Newton, Centro, Tecpán de Galeana, Guerrero, C.P. 40900, 2.º piso",
     }),
     [settings],
   );
