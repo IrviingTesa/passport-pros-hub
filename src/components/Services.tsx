@@ -54,14 +54,25 @@ export const Services = () => {
         ((svcRes.data as unknown) as (ServiceRow & { category_id: string | null })[]) ?? [];
 
       setCategories(
-        cats.map((c) => ({
-          ...c,
-          items: svcs.filter((s) => s.category_id === c.id),
-        })),
+        cats
+          .map((c) => ({
+            ...c,
+            items: svcs.filter((s) => s.category_id === c.id),
+          }))
+          // No mostrar categorías sin servicios activos
+          .filter((c) => c.items.length > 0),
       );
       setLoading(false);
     })();
   }, []);
+
+  // Rejilla adaptativa según cuántas categorías estén activas
+  const gridClass =
+    categories.length === 1
+      ? "grid grid-cols-1 gap-8 max-w-xl mx-auto"
+      : categories.length === 2
+        ? "grid sm:grid-cols-2 gap-8 max-w-4xl mx-auto"
+        : "grid sm:grid-cols-2 lg:grid-cols-3 gap-8";
 
   return (
     <section id="servicios" className="section-padding bg-gradient-section">
