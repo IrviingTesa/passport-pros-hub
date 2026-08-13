@@ -1,11 +1,51 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Facebook, Instagram, Youtube, Music2 } from "lucide-react";
 import logo from "@/assets/logo-emblem.png";
-import { SITE_CONFIG, SERVICE_CATEGORIES } from "@/config/site";
+import { SITE_CONFIG } from "@/config/site";
+import { supabase } from "@/integrations/supabase/client";
 import { useSiteSettings } from "@/contexts/SiteSettingsContext";
+
+interface FooterCategory {
+  id: string;
+  name: string;
+  items: { id: string; name: string; short_description: string | null }[];
+}
 
 export const Footer = () => {
   const { settings } = useSiteSettings();
+  const [categories, setCategories] = useState<FooterCategory[]>([]);
+
+  useEffect(() => {
+    (async () => {
+      const [catRes, svcRes] = await Promise.all([
+        supabase
+          .from("service_categories" as never)
+          .select("id, name, display_order, is_active")
+          .eq("is_active", true)
+          .order("display_order", { ascending: true }),
+        supabase
+          .from("services")
+          .select("id, name, category_id, short_description, display_order, is_active")
+          .eq("is_active", true)
+          .order("display_order", { ascending: true }),
+      ]);
+      const cats = ((catRes.data as unknown) as FooterCategory[]) ?? [];
+      const svcs =
+        ((svcRes.data as unknown) as {
+          id: string;
+          name: string;
+          category_id: string | null;
+          short_description: string | null;
+        }[]) ?? [];
+      setCategories(
+        cats
+          .map((c) => ({ ...c, items: svcs.filter((s) => s.category_id === c.id) }))
+          .filter((c) => c.items.length > 0),
+      );
+    })();
+  }, []);
+
   return (
     <footer className="bg-gradient-navy text-primary-foreground">
       <div className="container-narrow py-16">
