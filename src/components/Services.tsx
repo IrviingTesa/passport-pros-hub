@@ -91,7 +91,7 @@ export const Services = () => {
         </div>
 
         {loading ? (
-          <div className="grid lg:grid-cols-3 gap-8">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {Array.from({ length: 3 }).map((_, i) => (
               <Skeleton key={i} className="h-96 rounded-lg" />
             ))}
@@ -101,7 +101,7 @@ export const Services = () => {
             Próximamente publicaremos nuestros servicios.
           </p>
         ) : (
-          <div className="grid lg:grid-cols-3 gap-8">
+          <div className={gridClass}>
             {categories.map((category) => {
               const Icon = ICON_BY_SLUG[category.slug] ?? FileText;
               return (
