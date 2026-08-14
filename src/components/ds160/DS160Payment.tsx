@@ -31,6 +31,26 @@ export function DS160Payment({ applicationId, editToken, onPaid }: Props) {
   const [loading, setLoading] = useState(false);
   const [checking, setChecking] = useState(true);
   const [payment, setPayment] = useState<PaymentRow | null>(null);
+  const [downloading, setDownloading] = useState(false);
+
+  const downloadQuestions = async () => {
+    setDownloading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke<{
+        url?: string;
+        error?: string;
+      }>("ds160-resource-download", {
+        body: { application_id: applicationId, edit_token: editToken },
+      });
+      if (error || !data?.url) {
+        toast.error(data?.error ?? "Aún no está disponible el documento.");
+        return;
+      }
+      window.open(data.url, "_blank");
+    } finally {
+      setDownloading(false);
+    }
+  };
 
   const total = BASE_PRICE + (addon ? ADDON_PRICE : 0);
 
