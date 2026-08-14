@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Loader2, CreditCard, CheckCircle2, RefreshCw, ShieldCheck } from "lucide-react";
+import { Loader2, CreditCard, CheckCircle2, RefreshCw, ShieldCheck, FileDown } from "lucide-react";
 import { toast } from "sonner";
 
 const BASE_PRICE = 600;
