@@ -57,15 +57,15 @@ interface DS160Resource {
   updated_at: string;
 }
 
+const RESOURCE_SLUGS = ["preguntas-posibles", "preguntas-posibles-renovacion"] as const;
+
 export default function SocialMediaAdmin() {
   const [channels, setChannels] = useState<VideoChannelsRow | null>(null);
   const [settings, setSettings] = useState<SiteSettings | null>(null);
-  const [resource, setResource] = useState<DS160Resource | null>(null);
+  const [resources, setResources] = useState<DS160Resource[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [uploading, setUploading] = useState(false);
   const [syncing, setSyncing] = useState(false);
-  const fileRef = useRef<HTMLInputElement>(null);
 
   const load = async () => {
     setLoading(true);
@@ -85,15 +85,14 @@ export default function SocialMediaAdmin() {
       supabase
         .from("ds160_resources" as never)
         .select("*")
-        .eq("slug", "preguntas-posibles")
-        .maybeSingle(),
+        .in("slug", RESOURCE_SLUGS as unknown as string[]),
     ]);
     if (ch.error) toast.error(ch.error.message);
     if (st.error) toast.error(st.error.message);
     if (rs.error) toast.error(rs.error.message);
     setChannels(ch.data as VideoChannelsRow | null);
     setSettings((st.data as unknown) as SiteSettings | null);
-    setResource((rs.data as unknown) as DS160Resource | null);
+    setResources(((rs.data ?? []) as unknown) as DS160Resource[]);
     setLoading(false);
   };
 
