@@ -93,6 +93,19 @@ export function DS160Payment({ applicationId, editToken, onPaid }: Props) {
           <p className="text-sm text-muted-foreground">
             Recibimos tu pago de ${Number(payment.amount).toFixed(2)} MXN. Puedes enviar tu solicitud.
           </p>
+          <div className="pt-2">
+            <Button variant="gold" onClick={downloadQuestions} disabled={downloading}>
+              {downloading ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <FileDown className="w-4 h-4" />
+              )}
+              Descargar preguntas posibles (PDF)
+            </Button>
+            <p className="text-xs text-muted-foreground mt-2">
+              Se descarga el documento que corresponde a tu caso (primera vez o renovación).
+            </p>
+          </div>
         </CardContent>
       </Card>
     );
