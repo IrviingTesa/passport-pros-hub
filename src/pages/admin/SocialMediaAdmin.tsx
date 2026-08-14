@@ -148,8 +148,7 @@ export default function SocialMediaAdmin() {
   };
 
 
-  const handleUpload = async (file: File) => {
-    if (!resource) return;
+  const handleUpload = async (resource: DS160Resource, file: File) => {
     if (file.type !== "application/pdf") {
       toast.error("Sólo se permiten archivos PDF");
       return;
@@ -158,8 +157,7 @@ export default function SocialMediaAdmin() {
       toast.error("El PDF debe pesar menos de 20MB");
       return;
     }
-    setUploading(true);
-    const path = `preguntas-posibles/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
+    const path = `${resource.slug}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
     const { error: upErr } = await supabase.storage
       .from("ds160-resources")
       .upload(path, file, {
@@ -167,8 +165,8 @@ export default function SocialMediaAdmin() {
         upsert: false,
       });
     if (upErr) {
-      setUploading(false);
-      return toast.error(upErr.message);
+      toast.error(upErr.message);
+      return;
     }
     // Remove previous file
     if (resource.storage_path) {
@@ -185,14 +183,13 @@ export default function SocialMediaAdmin() {
         size_bytes: file.size,
       } as never)
       .eq("id", resource.id);
-    setUploading(false);
     if (updErr) return toast.error(updErr.message);
     toast.success("PDF actualizado");
     load();
   };
 
-  const downloadResource = async () => {
-    if (!resource?.storage_path) return;
+  const downloadResource = async (resource: DS160Resource) => {
+    if (!resource.storage_path) return;
     const { data, error } = await supabase.storage
       .from("ds160-resources")
       .createSignedUrl(resource.storage_path, 60);
@@ -200,8 +197,8 @@ export default function SocialMediaAdmin() {
     window.open(data.signedUrl, "_blank");
   };
 
-  const removeResource = async () => {
-    if (!resource?.storage_path) return;
+  const removeResource = async (resource: DS160Resource) => {
+    if (!resource.storage_path) return;
     if (!confirm("¿Eliminar el PDF actual?")) return;
     await supabase.storage
       .from("ds160-resources")
