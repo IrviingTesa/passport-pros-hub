@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Loader2, CreditCard, CheckCircle2, RefreshCw, ShieldCheck } from "lucide-react";
+import { Loader2, CreditCard, CheckCircle2, RefreshCw, ShieldCheck, FileDown } from "lucide-react";
 import { toast } from "sonner";
 
 const BASE_PRICE = 600;
@@ -31,6 +31,26 @@ export function DS160Payment({ applicationId, editToken, onPaid }: Props) {
   const [loading, setLoading] = useState(false);
   const [checking, setChecking] = useState(true);
   const [payment, setPayment] = useState<PaymentRow | null>(null);
+  const [downloading, setDownloading] = useState(false);
+
+  const downloadQuestions = async () => {
+    setDownloading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke<{
+        url?: string;
+        error?: string;
+      }>("ds160-resource-download", {
+        body: { application_id: applicationId, edit_token: editToken },
+      });
+      if (error || !data?.url) {
+        toast.error(data?.error ?? "Aún no está disponible el documento.");
+        return;
+      }
+      window.open(data.url, "_blank");
+    } finally {
+      setDownloading(false);
+    }
+  };
 
   const total = BASE_PRICE + (addon ? ADDON_PRICE : 0);
 
@@ -93,6 +113,19 @@ export function DS160Payment({ applicationId, editToken, onPaid }: Props) {
           <p className="text-sm text-muted-foreground">
             Recibimos tu pago de ${Number(payment.amount).toFixed(2)} MXN. Puedes enviar tu solicitud.
           </p>
+          <div className="pt-2">
+            <Button variant="gold" onClick={downloadQuestions} disabled={downloading}>
+              {downloading ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <FileDown className="w-4 h-4" />
+              )}
+              Descargar preguntas posibles (PDF)
+            </Button>
+            <p className="text-xs text-muted-foreground mt-2">
+              Se descarga el documento que corresponde a tu caso (primera vez o renovación).
+            </p>
+          </div>
         </CardContent>
       </Card>
     );

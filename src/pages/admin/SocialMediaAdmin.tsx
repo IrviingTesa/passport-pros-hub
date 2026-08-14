@@ -57,15 +57,15 @@ interface DS160Resource {
   updated_at: string;
 }
 
+const RESOURCE_SLUGS = ["preguntas-posibles", "preguntas-posibles-renovacion"] as const;
+
 export default function SocialMediaAdmin() {
   const [channels, setChannels] = useState<VideoChannelsRow | null>(null);
   const [settings, setSettings] = useState<SiteSettings | null>(null);
-  const [resource, setResource] = useState<DS160Resource | null>(null);
+  const [resources, setResources] = useState<DS160Resource[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [uploading, setUploading] = useState(false);
   const [syncing, setSyncing] = useState(false);
-  const fileRef = useRef<HTMLInputElement>(null);
 
   const load = async () => {
     setLoading(true);
@@ -85,15 +85,14 @@ export default function SocialMediaAdmin() {
       supabase
         .from("ds160_resources" as never)
         .select("*")
-        .eq("slug", "preguntas-posibles")
-        .maybeSingle(),
+        .in("slug", RESOURCE_SLUGS as unknown as string[]),
     ]);
     if (ch.error) toast.error(ch.error.message);
     if (st.error) toast.error(st.error.message);
     if (rs.error) toast.error(rs.error.message);
     setChannels(ch.data as VideoChannelsRow | null);
     setSettings((st.data as unknown) as SiteSettings | null);
-    setResource((rs.data as unknown) as DS160Resource | null);
+    setResources(((rs.data ?? []) as unknown) as DS160Resource[]);
     setLoading(false);
   };
 
@@ -149,8 +148,7 @@ export default function SocialMediaAdmin() {
   };
 
 
-  const handleUpload = async (file: File) => {
-    if (!resource) return;
+  const handleUpload = async (resource: DS160Resource, file: File) => {
     if (file.type !== "application/pdf") {
       toast.error("Sólo se permiten archivos PDF");
       return;
@@ -159,8 +157,7 @@ export default function SocialMediaAdmin() {
       toast.error("El PDF debe pesar menos de 20MB");
       return;
     }
-    setUploading(true);
-    const path = `preguntas-posibles/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
+    const path = `${resource.slug}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
     const { error: upErr } = await supabase.storage
       .from("ds160-resources")
       .upload(path, file, {
@@ -168,8 +165,8 @@ export default function SocialMediaAdmin() {
         upsert: false,
       });
     if (upErr) {
-      setUploading(false);
-      return toast.error(upErr.message);
+      toast.error(upErr.message);
+      return;
     }
     // Remove previous file
     if (resource.storage_path) {
@@ -186,14 +183,13 @@ export default function SocialMediaAdmin() {
         size_bytes: file.size,
       } as never)
       .eq("id", resource.id);
-    setUploading(false);
     if (updErr) return toast.error(updErr.message);
     toast.success("PDF actualizado");
     load();
   };
 
-  const downloadResource = async () => {
-    if (!resource?.storage_path) return;
+  const downloadResource = async (resource: DS160Resource) => {
+    if (!resource.storage_path) return;
     const { data, error } = await supabase.storage
       .from("ds160-resources")
       .createSignedUrl(resource.storage_path, 60);
@@ -201,8 +197,8 @@ export default function SocialMediaAdmin() {
     window.open(data.signedUrl, "_blank");
   };
 
-  const removeResource = async () => {
-    if (!resource?.storage_path) return;
+  const removeResource = async (resource: DS160Resource) => {
+    if (!resource.storage_path) return;
     if (!confirm("¿Eliminar el PDF actual?")) return;
     await supabase.storage
       .from("ds160-resources")
@@ -394,63 +390,33 @@ export default function SocialMediaAdmin() {
             <div>
               <CardTitle>Preguntas posibles (PDF)</CardTitle>
               <CardDescription>
-                PDF compartido que se entregará a los usuarios después de un
-                pago aprobado del DS-160.
+                Sube un PDF para primera vez y otro para renovación. Después de
+                un pago aprobado, el sistema entrega automáticamente el archivo
+                que corresponde según la respuesta de renovación en el DS-160.
               </CardDescription>
             </div>
           </div>
         </CardHeader>
-        <CardContent className="space-y-3">
-          {resource?.storage_path ? (
-            <div className="flex items-center justify-between gap-3 border rounded-md p-3 bg-muted/30">
-              <div className="min-w-0">
-                <div className="font-medium truncate">{resource.file_name}</div>
-                <div className="text-xs text-muted-foreground">
-                  {resource.size_bytes
-                    ? `${(resource.size_bytes / 1024).toFixed(0)} KB`
-                    : ""}{" "}
-                  · actualizado{" "}
-                  {new Date(resource.updated_at).toLocaleDateString("es-MX")}
-                </div>
-              </div>
-              <div className="flex gap-1">
-                <Button size="sm" variant="outline" onClick={downloadResource}>
-                  <Download className="w-4 h-4" /> Ver
-                </Button>
-                <Button size="sm" variant="ghost" onClick={removeResource}>
-                  <Trash2 className="w-4 h-4 text-destructive" />
-                </Button>
-              </div>
-            </div>
-          ) : (
-            <div className="text-sm text-muted-foreground border border-dashed rounded-md p-4 text-center">
-              No hay PDF cargado todavía.
-            </div>
-          )}
-          <input
-            ref={fileRef}
-            type="file"
-            accept="application/pdf"
-            className="hidden"
-            onChange={(e) => {
-              const f = e.target.files?.[0];
-              if (f) handleUpload(f);
-              if (fileRef.current) fileRef.current.value = "";
-            }}
-          />
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => fileRef.current?.click()}
-            disabled={uploading}
-          >
-            {uploading ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              <Upload className="w-4 h-4" />
-            )}
-            {resource?.storage_path ? "Reemplazar PDF" : "Subir PDF"}
-          </Button>
+        <CardContent className="grid md:grid-cols-2 gap-4">
+          {RESOURCE_SLUGS.map((slug) => {
+            const res = resources.find((r) => r.slug === slug);
+            const isRenewal = slug === "preguntas-posibles-renovacion";
+            return (
+              <ResourceCard
+                key={slug}
+                label={isRenewal ? "Renovación" : "Primera vez"}
+                hint={
+                  isRenewal
+                    ? "Se entrega cuando el solicitante indica que es renovación."
+                    : "Se entrega cuando el solicitante indica que es su primera visa."
+                }
+                resource={res ?? null}
+                onUpload={(file) => res && handleUpload(res, file)}
+                onView={() => res && downloadResource(res)}
+                onRemove={() => res && removeResource(res)}
+              />
+            );
+          })}
         </CardContent>
       </Card>
 
@@ -493,6 +459,92 @@ function Field({
         placeholder={placeholder}
         maxLength={250}
       />
+    </div>
+  );
+}
+
+function ResourceCard({
+  label,
+  hint,
+  resource,
+  onUpload,
+  onView,
+  onRemove,
+}: {
+  label: string;
+  hint: string;
+  resource: DS160Resource | null;
+  onUpload: (file: File) => void;
+  onView: () => void;
+  onRemove: () => void;
+}) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [busy, setBusy] = useState(false);
+
+  return (
+    <div className="border rounded-lg p-4 space-y-3">
+      <div>
+        <div className="font-semibold text-primary">{label}</div>
+        <p className="text-xs text-muted-foreground">{hint}</p>
+      </div>
+
+      {resource?.storage_path ? (
+        <div className="flex items-center justify-between gap-3 border rounded-md p-3 bg-muted/30">
+          <div className="min-w-0">
+            <div className="font-medium truncate text-sm">
+              {resource.file_name}
+            </div>
+            <div className="text-xs text-muted-foreground">
+              {resource.size_bytes
+                ? `${(resource.size_bytes / 1024).toFixed(0)} KB`
+                : ""}{" "}
+              · actualizado{" "}
+              {new Date(resource.updated_at).toLocaleDateString("es-MX")}
+            </div>
+          </div>
+          <div className="flex gap-1 shrink-0">
+            <Button size="sm" variant="outline" onClick={onView}>
+              <Download className="w-4 h-4" /> Ver
+            </Button>
+            <Button size="sm" variant="ghost" onClick={onRemove}>
+              <Trash2 className="w-4 h-4 text-destructive" />
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <div className="text-sm text-muted-foreground border border-dashed rounded-md p-4 text-center">
+          No hay PDF cargado todavía.
+        </div>
+      )}
+
+      <input
+        ref={inputRef}
+        type="file"
+        accept="application/pdf"
+        className="hidden"
+        onChange={async (e) => {
+          const f = e.target.files?.[0];
+          if (inputRef.current) inputRef.current.value = "";
+          if (!f) return;
+          setBusy(true);
+          await onUpload(f);
+          setBusy(false);
+        }}
+      />
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        onClick={() => inputRef.current?.click()}
+        disabled={busy || !resource}
+      >
+        {busy ? (
+          <Loader2 className="w-4 h-4 animate-spin" />
+        ) : (
+          <Upload className="w-4 h-4" />
+        )}
+        {resource?.storage_path ? "Reemplazar PDF" : "Subir PDF"}
+      </Button>
     </div>
   );
 }
