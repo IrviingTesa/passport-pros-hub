@@ -390,63 +390,33 @@ export default function SocialMediaAdmin() {
             <div>
               <CardTitle>Preguntas posibles (PDF)</CardTitle>
               <CardDescription>
-                PDF compartido que se entregará a los usuarios después de un
-                pago aprobado del DS-160.
+                Sube un PDF para primera vez y otro para renovación. Después de
+                un pago aprobado, el sistema entrega automáticamente el archivo
+                que corresponde según la respuesta de renovación en el DS-160.
               </CardDescription>
             </div>
           </div>
         </CardHeader>
-        <CardContent className="space-y-3">
-          {resource?.storage_path ? (
-            <div className="flex items-center justify-between gap-3 border rounded-md p-3 bg-muted/30">
-              <div className="min-w-0">
-                <div className="font-medium truncate">{resource.file_name}</div>
-                <div className="text-xs text-muted-foreground">
-                  {resource.size_bytes
-                    ? `${(resource.size_bytes / 1024).toFixed(0)} KB`
-                    : ""}{" "}
-                  · actualizado{" "}
-                  {new Date(resource.updated_at).toLocaleDateString("es-MX")}
-                </div>
-              </div>
-              <div className="flex gap-1">
-                <Button size="sm" variant="outline" onClick={downloadResource}>
-                  <Download className="w-4 h-4" /> Ver
-                </Button>
-                <Button size="sm" variant="ghost" onClick={removeResource}>
-                  <Trash2 className="w-4 h-4 text-destructive" />
-                </Button>
-              </div>
-            </div>
-          ) : (
-            <div className="text-sm text-muted-foreground border border-dashed rounded-md p-4 text-center">
-              No hay PDF cargado todavía.
-            </div>
-          )}
-          <input
-            ref={fileRef}
-            type="file"
-            accept="application/pdf"
-            className="hidden"
-            onChange={(e) => {
-              const f = e.target.files?.[0];
-              if (f) handleUpload(f);
-              if (fileRef.current) fileRef.current.value = "";
-            }}
-          />
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => fileRef.current?.click()}
-            disabled={uploading}
-          >
-            {uploading ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              <Upload className="w-4 h-4" />
-            )}
-            {resource?.storage_path ? "Reemplazar PDF" : "Subir PDF"}
-          </Button>
+        <CardContent className="grid md:grid-cols-2 gap-4">
+          {RESOURCE_SLUGS.map((slug) => {
+            const res = resources.find((r) => r.slug === slug);
+            const isRenewal = slug === "preguntas-posibles-renovacion";
+            return (
+              <ResourceCard
+                key={slug}
+                label={isRenewal ? "Renovación" : "Primera vez"}
+                hint={
+                  isRenewal
+                    ? "Se entrega cuando el solicitante indica que es renovación."
+                    : "Se entrega cuando el solicitante indica que es su primera visa."
+                }
+                resource={res ?? null}
+                onUpload={(file) => res && handleUpload(res, file)}
+                onView={() => res && downloadResource(res)}
+                onRemove={() => res && removeResource(res)}
+              />
+            );
+          })}
         </CardContent>
       </Card>
 
