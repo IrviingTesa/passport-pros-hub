@@ -1,1 +1,4 @@
 project_id = "fngefvyaqllxpsqopplt"
+
+[functions.ds160-resource-download]
+verify_jwt = false
