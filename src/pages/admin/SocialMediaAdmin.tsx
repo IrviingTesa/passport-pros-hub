@@ -462,3 +462,89 @@ function Field({
     </div>
   );
 }
+
+function ResourceCard({
+  label,
+  hint,
+  resource,
+  onUpload,
+  onView,
+  onRemove,
+}: {
+  label: string;
+  hint: string;
+  resource: DS160Resource | null;
+  onUpload: (file: File) => void;
+  onView: () => void;
+  onRemove: () => void;
+}) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [busy, setBusy] = useState(false);
+
+  return (
+    <div className="border rounded-lg p-4 space-y-3">
+      <div>
+        <div className="font-semibold text-primary">{label}</div>
+        <p className="text-xs text-muted-foreground">{hint}</p>
+      </div>
+
+      {resource?.storage_path ? (
+        <div className="flex items-center justify-between gap-3 border rounded-md p-3 bg-muted/30">
+          <div className="min-w-0">
+            <div className="font-medium truncate text-sm">
+              {resource.file_name}
+            </div>
+            <div className="text-xs text-muted-foreground">
+              {resource.size_bytes
+                ? `${(resource.size_bytes / 1024).toFixed(0)} KB`
+                : ""}{" "}
+              · actualizado{" "}
+              {new Date(resource.updated_at).toLocaleDateString("es-MX")}
+            </div>
+          </div>
+          <div className="flex gap-1 shrink-0">
+            <Button size="sm" variant="outline" onClick={onView}>
+              <Download className="w-4 h-4" /> Ver
+            </Button>
+            <Button size="sm" variant="ghost" onClick={onRemove}>
+              <Trash2 className="w-4 h-4 text-destructive" />
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <div className="text-sm text-muted-foreground border border-dashed rounded-md p-4 text-center">
+          No hay PDF cargado todavía.
+        </div>
+      )}
+
+      <input
+        ref={inputRef}
+        type="file"
+        accept="application/pdf"
+        className="hidden"
+        onChange={async (e) => {
+          const f = e.target.files?.[0];
+          if (inputRef.current) inputRef.current.value = "";
+          if (!f) return;
+          setBusy(true);
+          await onUpload(f);
+          setBusy(false);
+        }}
+      />
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        onClick={() => inputRef.current?.click()}
+        disabled={busy || !resource}
+      >
+        {busy ? (
+          <Loader2 className="w-4 h-4 animate-spin" />
+        ) : (
+          <Upload className="w-4 h-4" />
+        )}
+        {resource?.storage_path ? "Reemplazar PDF" : "Subir PDF"}
+      </Button>
+    </div>
+  );
+}
